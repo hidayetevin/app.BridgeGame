@@ -15,8 +15,8 @@ export const MATERIALS: Record<MaterialType, MaterialProps> = {
         name: 'Asphalt Road',
         color: '#343a40', // Dark Asphalt
         cost: 100,
-        strength: 25000, // Reduced for gameplay balance
-        stiffness: 1e5, // Much flexible to show strain
+        strength: 500000, // 500k
+        stiffness: 5e5, // Stiffer
         thickness: 0.25, // Thick road surface
         isRoad: true,
     },
@@ -24,8 +24,8 @@ export const MATERIALS: Record<MaterialType, MaterialProps> = {
         name: 'Wood Beam',
         color: '#8B4513', // Brown
         cost: 10,
-        strength: 5000, // Very fragile
-        stiffness: 5e4, // Very flexible
+        strength: 100000, // 100k
+        stiffness: 2e5, // Very flexible
         thickness: 0.12, // Standard beam
         isRoad: false,
     },
@@ -33,8 +33,8 @@ export const MATERIALS: Record<MaterialType, MaterialProps> = {
         name: 'Steel Beam',
         color: '#708090', // Grey
         cost: 50,
-        strength: 40000,
-        stiffness: 5e5,
+        strength: 2000000, // 2 Million! Super strong
+        stiffness: 2e6, // Very Stiff
         thickness: 0.15,
         isRoad: false,
     },

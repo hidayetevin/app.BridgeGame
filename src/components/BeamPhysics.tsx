@@ -55,7 +55,7 @@ const IntactBeam = ({
 
     // Physics Body
     const [beamRef] = useBox(() => ({
-        mass: 0.2, // increased slightly for realism
+        mass: 0.05, // Significantly reduced mass to prevent self-collapse
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
         args: [length, customThickness, 5],
@@ -88,25 +88,30 @@ const IntactBeam = ({
         const unsub1 = startBodyData.api.position.subscribe((v: number[]) => p1.set(v[0], v[1], v[2]));
         const unsub2 = endBodyData.api.position.subscribe((v: number[]) => p2.set(v[0], v[1], v[2]));
 
-        const interval = setInterval(() => {
-            const dist = p1.distanceTo(p2);
-            const strain = Math.abs(dist - length);
+        let checkInterval: NodeJS.Timeout;
 
-            // Force = Strain (extension) * Stiffness (k)
-            // Removing scaling factor to make it sensitive (Hooke's Law)
-            const force = strain * materialProps.stiffness;
+        // Delay stress check to let physics settle (1s grace period)
+        const startTimeout = setTimeout(() => {
+            checkInterval = setInterval(() => {
+                const dist = p1.distanceTo(p2);
+                const strain = Math.abs(dist - length);
 
-            setCurrentForce(force);
+                // Force = Strain * Stiffness
+                const force = strain * materialProps.stiffness;
 
-            if (force > materialProps.strength) {
-                breakBeam(id);
-            }
-        }, 100); // Check 10 times a second, not every frame
+                setCurrentForce(force);
+
+                if (force > materialProps.strength) {
+                    breakBeam(id);
+                }
+            }, 100);
+        }, 1000);
 
         return () => {
             unsub1();
             unsub2();
-            clearInterval(interval);
+            clearTimeout(startTimeout);
+            if (checkInterval) clearInterval(checkInterval);
         };
     }, [breakBeam, id, length, materialProps, startBodyData, endBodyData]);
 
@@ -159,7 +164,7 @@ const BrokenBeam = ({
 
     // Physics Body - Same props but different behavior
     const [beamRef] = useBox(() => ({
-        mass: 0.2,
+        mass: 0.05,
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
         args: [length, customThickness, 5],
