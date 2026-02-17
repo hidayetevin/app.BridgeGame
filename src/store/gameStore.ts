@@ -333,11 +333,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     setWon: (won) => {
-        set({ hasWon: won, isTimerRunning: false });
+        const { hasLost } = get();
+        if (!hasLost) {
+            set({ hasWon: won, isTimerRunning: false });
+        }
     },
-
     setLost: (lost) => {
-        set({ hasLost: lost, isTimerRunning: false });
+        const { hasWon } = get();
+        if (!hasWon) {
+            set({ hasLost: lost, isTimerRunning: false });
+        }
     },
 
     loadLevel: (index) => {

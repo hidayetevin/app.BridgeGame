@@ -80,7 +80,7 @@ export default function Vehicle() {
             setWon(true);
         }
 
-        if (posY.current < level.waterLevel && !hasFallen.current) {
+        if (posY.current < level.waterLevel && !hasFallen.current && !hasWon.current) {
             hasFallen.current = true;
             setLost(true);
         }
