@@ -53,12 +53,15 @@ const IntactBeam = ({
     const collisionMask = isRoad ? 2 : 0;
     const damping = isRoad ? 0.5 : 0.1;
 
+    // HACK: Increase collision thickness for roads to prevent tunneling
+    const collisionThickness = isRoad ? 0.5 : customThickness;
+
     // Physics Body
     const [beamRef] = useBox(() => ({
         mass: 0.05, // Significantly reduced mass to prevent self-collapse
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
-        args: [length, customThickness, 5],
+        args: [length, collisionThickness, 5],
         collisionFilterGroup: 4,
         collisionFilterMask: collisionMask,
         angularFactor: [0, 0, 1] as [number, number, number],

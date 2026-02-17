@@ -35,7 +35,7 @@ export default function Vehicle() {
     const [wheel1Ref, wheel1Api] = useSphere(() => ({
         mass: 2,
         position: [level.vehicleStart.x - 0.6, level.vehicleStart.y - 0.4, 0],
-        args: [0.35],
+        args: [0.45],
         friction: 2, // High friction for grip
         collisionFilterGroup: 2,
         collisionFilterMask: 1 | 4, // Ground and Beams only
@@ -45,7 +45,7 @@ export default function Vehicle() {
     const [wheel2Ref, wheel2Api] = useSphere(() => ({
         mass: 2,
         position: [level.vehicleStart.x + 0.6, level.vehicleStart.y - 0.4, 0],
-        args: [0.35],
+        args: [0.45],
         friction: 2,
         collisionFilterGroup: 2,
         collisionFilterMask: 1 | 4, // Ground and Beams only
