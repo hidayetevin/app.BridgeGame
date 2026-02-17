@@ -34,4 +34,5 @@ export interface LevelData {
     platformRightX: number;
     platformY: number;
     platformWidth: number;
+    timeLimit: number; // Seconds
 }

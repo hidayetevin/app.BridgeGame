@@ -6,7 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
 
 export default function Vehicle() {
-    const { gameState, setWin, setLoss } = useGameStore();
+    const { gameState, setWon, setLost } = useGameStore();
     const level = LEVELS[gameState.levelIndex];
 
     const posX = useRef(level.vehicleStart.x);
@@ -77,12 +77,12 @@ export default function Vehicle() {
 
         if (posX.current >= level.vehicleTarget && !hasWon.current) {
             hasWon.current = true;
-            setWin();
+            setWon(true);
         }
 
         if (posY.current < level.waterLevel && !hasFallen.current) {
             hasFallen.current = true;
-            setLoss();
+            setLost(true);
         }
 
         // Drive Logic

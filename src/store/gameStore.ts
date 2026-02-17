@@ -29,6 +29,10 @@ interface GameStore {
     hasWon: boolean;
     hasLost: boolean;
 
+    // Timer State
+    timeLeft: number;
+    isTimerRunning: boolean;
+
     // Actions - Nodes
     addNode: (x: number, y: number, type?: 'normal' | 'anchor') => void;
     removeNode: (id: string) => void;
@@ -53,11 +57,16 @@ interface GameStore {
     unregisterPhysicsBody: (nodeId: string) => void;
     getPhysicsBody: (nodeId: string) => PhysicsBodyData | undefined;
 
+    // Actions - Timer
+    setTime: (time: number) => void;
+    decrementTime: () => void;
+    stopTimer: () => void;
+
     // Actions - Game State
     setMode: (mode: 'editor' | 'simulation') => void;
-    setWin: () => void;
-    setLoss: () => void;
-    loadLevel: (levelIndex: number) => void;
+    setWon: (won: boolean) => void;
+    setLost: (lost: boolean) => void;
+    loadLevel: (index: number) => void;
     resetLevel: () => void;
 }
 
@@ -67,7 +76,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     beams: [],
     gameState: {
         mode: 'editor',
-        budget: 1000,
+        budget: 0,
         spent: 0,
         levelIndex: 0,
     },
@@ -79,6 +88,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     brokenBeamIds: new Set(),
     hasWon: false,
     hasLost: false,
+    timeLeft: 0,
+    isTimerRunning: false,
 
     // Node Actions
     addNode: (x, y, type = 'normal') => {
@@ -197,26 +208,59 @@ export const useGameStore = create<GameStore>((set, get) => ({
         return get().physicsBodies.get(nodeId);
     },
 
+    // Timer Actions
+    setTime: (time) => set({ timeLeft: time }),
+    decrementTime: () => {
+        const { timeLeft, hasWon, hasLost } = get();
+
+        // If already over, stop
+        if (hasWon || hasLost) {
+            set({ isTimerRunning: false });
+            return;
+        }
+
+        if (timeLeft > 0) {
+            const newTime = timeLeft - 1;
+            set({ timeLeft: newTime });
+
+            // Check immediately if time is up
+            if (newTime === 0) {
+                set({ hasLost: true, isTimerRunning: false });
+            }
+        }
+    },
+    stopTimer: () => set({ isTimerRunning: false }),
+
     // Game State Actions
     setMode: (mode) => {
-        set((state) => ({
-            gameState: { ...state.gameState, mode },
-            brokenBeamIds: new Set(),
-            hasWon: false,
-            hasLost: false,
-        }));
+        set((state) => {
+            // Find current level time limit
+            const currentLevel = LEVELS[state.gameState.levelIndex];
+            const timeLimit = currentLevel?.timeLimit || 30;
+
+            return {
+                gameState: { ...state.gameState, mode },
+                physicsBodies: mode === 'editor' ? new Map() : state.physicsBodies,
+                brokenBeamIds: mode === 'editor' ? new Set() : state.brokenBeamIds,
+                hasWon: false,
+                hasLost: false,
+                // Timer Logic: Start on simulation, stop on editor
+                timeLeft: mode === 'simulation' ? timeLimit : 0,
+                isTimerRunning: mode === 'simulation',
+            };
+        });
     },
 
-    setWin: () => {
-        set({ hasWon: true });
+    setWon: (won) => {
+        set({ hasWon: won, isTimerRunning: false });
     },
 
-    setLoss: () => {
-        set({ hasLost: true });
+    setLost: (lost) => {
+        set({ hasLost: lost, isTimerRunning: false });
     },
 
-    loadLevel: (levelIndex) => {
-        const level = LEVELS[levelIndex];
+    loadLevel: (index) => {
+        const level = LEVELS[index];
         if (!level) return;
 
         set({
@@ -229,11 +273,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
             brokenBeamIds: new Set(),
             hasWon: false,
             hasLost: false,
+            timeLeft: 0,
+            isTimerRunning: false,
             gameState: {
                 mode: 'editor',
                 budget: level.budget,
                 spent: 0,
-                levelIndex,
+                levelIndex: index,
             },
         });
 

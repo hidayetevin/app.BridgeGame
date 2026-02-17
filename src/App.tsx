@@ -4,7 +4,7 @@ import { useGameStore } from './store/gameStore';
 import { LEVELS } from './data/levels';
 
 function App() {
-    const { nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial } = useGameStore();
+    const { nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
 
     // Initialize level on mount
@@ -14,10 +14,42 @@ function App() {
         }
     }, []);
 
+    // Timer Logic
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isTimerRunning && timeLeft > 0) {
+            interval = setInterval(() => {
+                decrementTime();
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [isTimerRunning, timeLeft, decrementTime]);
+
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             {/* 3D Scene */}
             <Scene />
+
+            {/* Timer Overlay - Top Center */}
+            {gameState.mode === 'simulation' && (
+                <div style={{
+                    position: 'absolute',
+                    top: '80px', // Moved down below buttons
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    color: timeLeft <= 5 ? '#f44336' : 'white', // Red if low time
+                    fontWeight: 'bold',
+                    fontSize: '24px',
+                    background: 'rgba(0,0,0,0.5)',
+                    padding: '8px 24px',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(4px)',
+                    border: timeLeft <= 5 ? '2px solid #f44336' : 'none',
+                    transition: 'all 0.3s'
+                }}>
+                    ⏱️ {timeLeft}s
+                </div>
+            )}
 
             {/* UI Overlay - Top Left */}
             <div style={{
@@ -193,9 +225,11 @@ function App() {
                     boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                 }}>
                     <div style={{ fontSize: '64px', marginBottom: '16px' }}>💀</div>
-                    <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>BRIDGE FAILED!</div>
+                    <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+                        {timeLeft === 0 ? "TIME'S UP!" : "BRIDGE FAILED!"}
+                    </div>
                     <div style={{ fontSize: '18px', marginBottom: '24px', opacity: 0.9 }}>
-                        The vehicle fell into the water
+                        {timeLeft === 0 ? "You ran out of time" : "The vehicle fell into the water"}
                     </div>
                     <button
                         onClick={resetLevel}

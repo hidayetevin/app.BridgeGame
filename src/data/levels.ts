@@ -29,7 +29,8 @@ export const LEVELS: LevelData[] = [
         platformLeftX: -15,   // Center at -15 start
         platformRightX: 15,   // Center at 15 end
         platformY: -2,        // Platform surface level (match anchors)
-        platformWidth: 20
+        platformWidth: 20,
+        timeLimit: 10
     },
     {
         id: 2,
@@ -46,7 +47,8 @@ export const LEVELS: LevelData[] = [
         platformLeftX: -17,
         platformRightX: 17,
         platformY: 0,
-        platformWidth: 20
+        platformWidth: 20,
+        timeLimit: 10
     },
     {
         id: 3,
@@ -63,6 +65,7 @@ export const LEVELS: LevelData[] = [
         platformLeftX: -19,
         platformRightX: 19,
         platformY: 2,
-        platformWidth: 20
+        platformWidth: 20,
+        timeLimit: 10
     },
 ];
