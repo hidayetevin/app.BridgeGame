@@ -17,9 +17,11 @@ export default function PhysicsWorld() {
         <>
             <Physics
                 gravity={[0, -20, 0]}
+                iterations={20}
+                step={1 / 60}
                 defaultContactMaterial={{
-                    friction: 0.8,    // High friction for tires
-                    restitution: 0.1, // Low bounce
+                    friction: 0.8,
+                    restitution: 0.1,
                 }}
             >
                 {/* Render physics-enabled nodes */}
@@ -33,7 +35,7 @@ export default function PhysicsWorld() {
                     />
                 ))}
 
-                {/* Render physics-enabled beams as constraints */}
+                {/* Render physics-enabled beams */}
                 {beams.map((beam) => (
                     <BeamPhysics
                         key={beam.id}
@@ -44,13 +46,13 @@ export default function PhysicsWorld() {
                     />
                 ))}
 
-                {/* Vehicle - now starts on platform */}
+                {/* Vehicle */}
                 <Vehicle />
 
                 {/* Left Ground Platform */}
                 <Ground
                     x={level.platformLeftX}
-                    y={level.platformY - 2.5} // Center Y (surface is at platformY)
+                    y={level.platformY - 2.5}
                     width={level.platformWidth}
                     height={5}
                 />
@@ -58,13 +60,13 @@ export default function PhysicsWorld() {
                 {/* Right Ground Platform */}
                 <Ground
                     x={level.platformRightX}
-                    y={level.platformY - 2.5} // Center Y
+                    y={level.platformY - 2.5}
                     width={level.platformWidth}
                     height={5}
                 />
             </Physics>
 
-            {/* Water level indicator (outside physics) */}
+            {/* Water level indicator */}
             <mesh position={[0, level.waterLevel, -0.5]}>
                 <planeGeometry args={[100, 1]} />
                 <meshBasicMaterial color="#2196F3" transparent opacity={0.3} />

@@ -5,6 +5,7 @@ import { useGameStore } from '../store/gameStore';
 import { MATERIALS, getStressColor } from '../utils/materials';
 import { MaterialType } from '../types';
 import * as THREE from 'three';
+import { Mesh } from 'three';
 
 interface BeamPhysicsProps {
     id: string;
@@ -13,29 +14,15 @@ interface BeamPhysicsProps {
     material: MaterialType;
 }
 
-// 1. Wrapper Component
-export default function BeamPhysicsWrapper(props: BeamPhysicsProps) {
-    const { getPhysicsBody } = useGameStore();
-
-    const startBodyData = getPhysicsBody(props.startNodeId);
-    const endBodyData = getPhysicsBody(props.endNodeId);
-
-    if (!startBodyData || !endBodyData) {
-        return null;
-    }
-
-    return <BeamPhysicsCore {...props} startBodyData={startBodyData} endBodyData={endBodyData} />;
-}
-
-// 2. Core Component
-function BeamPhysicsCore({
+// 2. Core Component (Define this first for hoisting, or as a const)
+const BeamPhysicsCore = ({
     id,
     startNodeId,
     endNodeId,
     material,
     startBodyData,
     endBodyData,
-}: BeamPhysicsProps & { startBodyData: any, endBodyData: any }) {
+}: BeamPhysicsProps & { startBodyData: any, endBodyData: any }) => {
     const { getNodeById, breakBeam } = useGameStore();
     const [currentForce, setCurrentForce] = useState(0);
 
@@ -53,41 +40,34 @@ function BeamPhysicsCore({
 
     const materialProps = MATERIALS[material];
 
-    // ==========================================
-    // COLLISION LOGIC (USER REQUESTED RULES)
-    // ==========================================
-    // 1. Wood & Steel (Supports): Vehicle MUST NOT collide. Mask = 0.
-    // 2. Road (Asphalt): Vehicle MUST collide (drive on it). Mask = 2.
     const isRoad = materialProps.isRoad;
     const collisionMask = isRoad ? 2 : 0;
 
-    // Stability settings for Road vs Supports
-    // Roads should be more stable (higher damping) to prevent jittery driving
     const damping = isRoad ? 0.5 : 0.1;
+
+    const physicsThickness = materialProps.thickness;
 
     // Create Physics Body for the Beam
     const [beamRef] = useBox(() => ({
         mass: 0.2,
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
-        args: [length, materialProps.thickness, 1], // Z=1 for driving width
-        collisionFilterGroup: 4, // Group 4: Beams
+        args: [length, physicsThickness, 5],
+        collisionFilterGroup: 4,
         collisionFilterMask: collisionMask,
 
-        // Stability Constraints:
-        // Only allow rotation around Z axis (2D plane)
-        angularFactor: [0, 0, 1],
+        angularFactor: [0, 0, 1] as [number, number, number],
         linearDamping: damping,
         angularDamping: damping,
     }));
 
-    // Constraint 1: Connect Beam Start to StartNode
+    // Constraint 1
     usePointToPointConstraint(beamRef, startBodyData.ref, {
         pivotA: [-length / 2, 0, 0],
         pivotB: [0, 0, 0],
     });
 
-    // Constraint 2: Connect Beam End to EndNode
+    // Constraint 2
     usePointToPointConstraint(beamRef, endBodyData.ref, {
         pivotA: [length / 2, 0, 0],
         pivotB: [0, 0, 0],
@@ -118,15 +98,31 @@ function BeamPhysicsCore({
     const stressColor = getStressColor(currentForce, materialProps.strength);
 
     return (
-        <mesh ref={beamRef as React.Ref<THREE.Mesh>}>
+        <mesh ref={beamRef as React.Ref<Mesh>}>
             <boxGeometry args={[length, materialProps.thickness, 1]} />
             <meshStandardMaterial
                 color={stressColor}
                 emissive={currentForce > materialProps.strength * 0.7 ? stressColor : '#000000'}
                 emissiveIntensity={currentForce > materialProps.strength * 0.7 ? 0.3 : 0}
-                transparent={!isRoad} // Visual cue: Supports specific look?
+                transparent={!isRoad}
                 opacity={1}
             />
         </mesh>
     );
-}
+};
+
+// 1. Wrapper Component (Default Export)
+const BeamPhysicsWrapper = (props: BeamPhysicsProps) => {
+    const { getPhysicsBody } = useGameStore();
+
+    const startBodyData = getPhysicsBody(props.startNodeId);
+    const endBodyData = getPhysicsBody(props.endNodeId);
+
+    if (!startBodyData || !endBodyData) {
+        return null;
+    }
+
+    return <BeamPhysicsCore {...props} startBodyData={startBodyData} endBodyData={endBodyData} />;
+};
+
+export default BeamPhysicsWrapper;

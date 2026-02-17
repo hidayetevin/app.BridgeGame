@@ -28,6 +28,7 @@ export default function Vehicle() {
         angularDamping: 0.5,
         collisionFilterGroup: 2,
         collisionFilterMask: 1 | 4, // Ground and Beams only
+        angularFactor: [0, 0, 1], // Lock rotation to Z axis only!
     }));
 
     // 2. Wheel 1 (Rear)
