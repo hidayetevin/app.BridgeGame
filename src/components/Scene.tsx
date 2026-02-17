@@ -9,6 +9,7 @@ import GhostBeam from './GhostBeam';
 import PhysicsWorld from './PhysicsWorld';
 import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
+import GroundVisual from './GroundVisual';
 
 export default function Scene() {
     const { nodes, beams, gameState } = useGameStore();
@@ -24,8 +25,10 @@ export default function Scene() {
             <Camera />
 
             {/* Lighting */}
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
+            {/* Lighting - Strong Environment Light */}
+            <ambientLight intensity={0.8} />
+            <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
+            <hemisphereLight intensity={1.0} groundColor="#444444" />
 
             {/* Grid for reference */}
             <Grid />
@@ -34,24 +37,14 @@ export default function Scene() {
             {!isSimulating && level && (
                 <>
                     {/* Left Ground Platform */}
-                    <mesh position={[level.platformLeftX, level.platformY - 2.5, 0]}>
-                        <boxGeometry args={[level.platformWidth, 5, 5]} />
-                        <meshStandardMaterial color="#4CAF50" />
-                        <mesh position={[0, 2.6, 0]}>
-                            <boxGeometry args={[level.platformWidth, 0.2, 5]} />
-                            <meshStandardMaterial color="#81C784" />
-                        </mesh>
-                    </mesh>
+                    <group position={[level.platformLeftX, level.platformY - 2.5, 0]}>
+                        <GroundVisual width={level.platformWidth} height={5} />
+                    </group>
 
                     {/* Right Ground Platform */}
-                    <mesh position={[level.platformRightX, level.platformY - 2.5, 0]}>
-                        <boxGeometry args={[level.platformWidth, 5, 5]} />
-                        <meshStandardMaterial color="#4CAF50" />
-                        <mesh position={[0, 2.6, 0]}>
-                            <boxGeometry args={[level.platformWidth, 0.2, 5]} />
-                            <meshStandardMaterial color="#81C784" />
-                        </mesh>
-                    </mesh>
+                    <group position={[level.platformRightX, level.platformY - 2.5, 0]}>
+                        <GroundVisual width={level.platformWidth} height={5} />
+                    </group>
 
                     {/* Water level indicator */}
                     <mesh position={[0, level.waterLevel, -0.5]}>
