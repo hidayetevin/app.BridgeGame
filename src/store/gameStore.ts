@@ -150,7 +150,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     breakBeam: (id) => {
         set((state) => ({
             brokenBeamIds: new Set([...state.brokenBeamIds, id]),
-            beams: state.beams.filter((b) => b.id !== id),
+            // Do NOT remove from beams array, so it stays visible (but broken)
         }));
     },
 
