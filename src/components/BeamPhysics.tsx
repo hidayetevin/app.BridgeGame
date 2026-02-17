@@ -20,8 +20,6 @@ export default function BeamPhysicsWrapper(props: BeamPhysicsProps) {
     const startBodyData = getPhysicsBody(props.startNodeId);
     const endBodyData = getPhysicsBody(props.endNodeId);
 
-    // If bodies are not ready yet, don't render the physics component
-    // This prevents constraint failures on initial render
     if (!startBodyData || !endBodyData) {
         return null;
     }
@@ -55,14 +53,22 @@ function BeamPhysicsCore({
 
     const materialProps = MATERIALS[material];
 
+    // LOGIC: Use Material Properties for Collision Mask
+    // If material.isRoad, it collides with Vehicle (2).
+    // If not (Wood/Steel), it's structural only (Mask 0).
+    const collisionMask = materialProps.isRoad ? 2 : 0;
+
     // Create Physics Body for the Beam
     const [beamRef] = useBox(() => ({
-        mass: 0.2,
+        mass: 0.2, // Light but physical
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
         args: [length, materialProps.thickness, 1],
         collisionFilterGroup: 4, // Group 4: Beams
-        collisionFilterMask: 2,  // Only collide with Vehicle (2)
+        collisionFilterMask: collisionMask,
+        angularFactor: [0, 0, 1], // Only allow rotation around Z axis (2D plane). Prevents flipping over.
+        linearDamping: 0.1,       // Add some damping for stability
+        angularDamping: 0.1,
     }));
 
     // Constraint 1: Connect Beam Start to StartNode
@@ -79,7 +85,6 @@ function BeamPhysicsCore({
 
     // Stress Calculation
     useFrame(() => {
-        // Safety check mostly for hot reload or cleanup
         if (!startBodyData.api || !endBodyData.api) return;
 
         const startPos = new THREE.Vector3();
@@ -109,6 +114,8 @@ function BeamPhysicsCore({
                 color={stressColor}
                 emissive={currentForce > materialProps.strength * 0.7 ? stressColor : '#000000'}
                 emissiveIntensity={currentForce > materialProps.strength * 0.7 ? 0.3 : 0}
+            // Make non-road materials slightly distinct or thinner? 
+            // We already have color and thickness from materialProps.
             />
         </mesh>
     );

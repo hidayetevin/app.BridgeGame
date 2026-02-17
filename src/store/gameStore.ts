@@ -19,6 +19,7 @@ interface GameStore {
     selectedNodeId: string | null;
     isDrawingBeam: boolean;
     ghostBeamEnd: { x: number; y: number } | null;
+    selectedMaterial: MaterialType; // New State
 
     // Physics State
     physicsBodies: Map<string, PhysicsBodyData>;
@@ -45,6 +46,7 @@ interface GameStore {
     updateGhostBeam: (x: number, y: number) => void;
     finishDrawingBeam: (endNodeId: string, material: MaterialType) => void;
     cancelDrawingBeam: () => void;
+    selectMaterial: (material: MaterialType) => void; // New Action
 
     // Actions - Physics
     registerPhysicsBody: (nodeId: string, ref: any, api: any) => void;
@@ -72,6 +74,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     selectedNodeId: null,
     isDrawingBeam: false,
     ghostBeamEnd: null,
+    selectedMaterial: 'road', // Default material
     physicsBodies: new Map(),
     brokenBeamIds: new Set(),
     hasWon: false,
@@ -107,6 +110,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Beam Actions
     addBeam: (startNodeId, endNodeId, material) => {
         if (get().getBeamBetween(startNodeId, endNodeId)) return;
+
+        // Check budget logic would go here
 
         const newBeam: Beam = {
             id: `beam_${Date.now()}_${Math.random()}`,
@@ -151,10 +156,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ ghostBeamEnd: { x, y } });
     },
 
-    finishDrawingBeam: (endNodeId, material = 'wood') => {
-        const { selectedNodeId, addBeam } = get();
+    finishDrawingBeam: (endNodeId) => {
+        const { selectedNodeId, addBeam, selectedMaterial } = get();
         if (selectedNodeId && endNodeId && selectedNodeId !== endNodeId) {
-            addBeam(selectedNodeId, endNodeId, material);
+            addBeam(selectedNodeId, endNodeId, selectedMaterial);
         }
         set({
             selectedNodeId: null,
@@ -169,6 +174,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             isDrawingBeam: false,
             ghostBeamEnd: null,
         });
+    },
+
+    selectMaterial: (material) => {
+        set({ selectedMaterial: material });
     },
 
     // Physics Actions

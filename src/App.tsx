@@ -4,7 +4,7 @@ import { useGameStore } from './store/gameStore';
 import { LEVELS } from './data/levels';
 
 function App() {
-    const { nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost } = useGameStore();
+    const { nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
 
     // Initialize level on mount
@@ -213,6 +213,52 @@ function App() {
                     </button>
                 </div>
             )}
+
+            {/* Material Selector - Bottom Left (Above Level Selector) */}
+            <div style={{
+                position: 'absolute',
+                bottom: '100px', // Adjusted to be above levels
+                left: '16px',
+                color: 'white',
+                fontSize: '14px',
+                background: 'rgba(0,0,0,0.5)',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                gap: '8px',
+                flexDirection: 'column'
+            }}>
+                <div style={{ fontWeight: 'bold' }}>Materials:</div>
+                {([
+                    { id: 'road', name: '🛣️ Road', color: '#343a40' },
+                    { id: 'wood', name: '🪵 Wood', color: '#8B4513' },
+                    { id: 'steel', name: '🏗️ Steel', color: '#708090' }
+                ] as const).map(mat => (
+                    <button
+                        key={mat.id}
+                        onClick={() => selectMaterial(mat.id)}
+                        disabled={gameState.mode === 'simulation'}
+                        style={{
+                            background: selectedMaterial === mat.id ? mat.color : 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            fontWeight: 'bold',
+                            border: selectedMaterial === mat.id ? '2px solid white' : '1px solid transparent',
+                            cursor: gameState.mode === 'simulation' ? 'not-allowed' : 'pointer',
+                            textAlign: 'left',
+                            opacity: gameState.mode === 'simulation' ? 0.5 : 1,
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <span>{mat.name}</span>
+                    </button>
+                ))}
+            </div>
 
             {/* Level Selector - Bottom Left */}
             <div style={{

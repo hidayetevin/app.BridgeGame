@@ -1,4 +1,4 @@
-// Type definitions for the Bridge Constructor game
+export type MaterialType = 'road' | 'wood' | 'steel' | 'cable'; // Keeping cable for backward compat if needed, but UI will show Road/Wood/Steel
 
 export interface Node {
     id: string;
@@ -14,16 +14,6 @@ export interface Beam {
     material: MaterialType;
 }
 
-export type MaterialType = 'wood' | 'steel' | 'cable';
-
-export interface MaterialProperties {
-    name: string;
-    color: string;
-    cost: number;
-    strength: number; // Max force before breaking
-    stiffness: number; // For physics constraint
-}
-
 export interface GameState {
     mode: 'editor' | 'simulation';
     budget: number;
@@ -36,7 +26,12 @@ export interface LevelData {
     name: string;
     budget: number;
     anchors: Array<{ x: number; y: number }>;
-    startX: number;
-    targetX: number;
+    vehicleStart: { x: number; y: number };
+    vehicleTarget: number;
     waterLevel: number;
+    gap: number;
+    platformLeftX: number;
+    platformRightX: number;
+    platformY: number;
+    platformWidth: number;
 }
