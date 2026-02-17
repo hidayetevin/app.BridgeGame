@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useBox, usePointToPointConstraint } from '@react-three/cannon';
 import { useGameStore } from '../store/gameStore';
@@ -13,7 +13,7 @@ interface BeamPhysicsProps {
     material: MaterialType;
 }
 
-// 1. Wrapper Component: Waits for nodes to be ready in physics system
+// 1. Wrapper Component
 export default function BeamPhysicsWrapper(props: BeamPhysicsProps) {
     const { getPhysicsBody } = useGameStore();
 
@@ -27,7 +27,7 @@ export default function BeamPhysicsWrapper(props: BeamPhysicsProps) {
     return <BeamPhysicsCore {...props} startBodyData={startBodyData} endBodyData={endBodyData} />;
 }
 
-// 2. Core Component: Only renders when refs are guaranteed to exist
+// 2. Core Component
 function BeamPhysicsCore({
     id,
     startNodeId,
@@ -53,22 +53,32 @@ function BeamPhysicsCore({
 
     const materialProps = MATERIALS[material];
 
-    // LOGIC: Use Material Properties for Collision Mask
-    // If material.isRoad, it collides with Vehicle (2).
-    // If not (Wood/Steel), it's structural only (Mask 0).
-    const collisionMask = materialProps.isRoad ? 2 : 0;
+    // ==========================================
+    // COLLISION LOGIC (USER REQUESTED RULES)
+    // ==========================================
+    // 1. Wood & Steel (Supports): Vehicle MUST NOT collide. Mask = 0.
+    // 2. Road (Asphalt): Vehicle MUST collide (drive on it). Mask = 2.
+    const isRoad = materialProps.isRoad;
+    const collisionMask = isRoad ? 2 : 0;
+
+    // Stability settings for Road vs Supports
+    // Roads should be more stable (higher damping) to prevent jittery driving
+    const damping = isRoad ? 0.5 : 0.1;
 
     // Create Physics Body for the Beam
     const [beamRef] = useBox(() => ({
-        mass: 0.2, // Light but physical
+        mass: 0.2,
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
-        args: [length, materialProps.thickness, 1],
+        args: [length, materialProps.thickness, 1], // Z=1 for driving width
         collisionFilterGroup: 4, // Group 4: Beams
         collisionFilterMask: collisionMask,
-        angularFactor: [0, 0, 1], // Only allow rotation around Z axis (2D plane). Prevents flipping over.
-        linearDamping: 0.1,       // Add some damping for stability
-        angularDamping: 0.1,
+
+        // Stability Constraints:
+        // Only allow rotation around Z axis (2D plane)
+        angularFactor: [0, 0, 1],
+        linearDamping: damping,
+        angularDamping: damping,
     }));
 
     // Constraint 1: Connect Beam Start to StartNode
@@ -114,8 +124,8 @@ function BeamPhysicsCore({
                 color={stressColor}
                 emissive={currentForce > materialProps.strength * 0.7 ? stressColor : '#000000'}
                 emissiveIntensity={currentForce > materialProps.strength * 0.7 ? 0.3 : 0}
-            // Make non-road materials slightly distinct or thinner? 
-            // We already have color and thickness from materialProps.
+                transparent={!isRoad} // Visual cue: Supports specific look?
+                opacity={1}
             />
         </mesh>
     );
