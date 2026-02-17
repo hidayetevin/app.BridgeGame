@@ -58,8 +58,8 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
 
         const handlePointerUp = () => {
             if (isDrawingBeam) {
-                const x = Math.round(gridPosition.x);
-                const y = Math.round(gridPosition.y);
+                const x = gridPosition.x;
+                const y = gridPosition.y;
                 const targetNode = getNodeAt(x, y);
 
                 if (targetNode && targetNode.id !== selectedNodeId) {

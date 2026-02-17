@@ -168,9 +168,90 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     finishDrawingBeam: (endNodeId) => {
-        const { selectedNodeId, addBeam, selectedMaterial } = get();
+        const { selectedNodeId, addBeam, selectedMaterial, nodes } = get();
+
         if (selectedNodeId && endNodeId && selectedNodeId !== endNodeId) {
-            addBeam(selectedNodeId, endNodeId, selectedMaterial);
+            const startNode = nodes.find(n => n.id === selectedNodeId);
+            const endNode = nodes.find(n => n.id === endNodeId);
+
+            if (startNode && endNode) {
+                const dx = endNode.x - startNode.x;
+                const dy = endNode.y - startNode.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const MAX_LEN = 3;
+
+                // Only split if it's Road and longer than MAX_LEN
+                if (selectedMaterial === 'road' && dist > MAX_LEN) {
+                    // Normalize direction vector
+                    const dirX = dx / dist;
+                    const dirY = dy / dist;
+
+                    let currentDist = 0;
+                    let prevNodeId = startNode.id;
+                    const newNodes: Node[] = [];
+                    const newBeams: Beam[] = [];
+
+                    // Step by MAX_LEN until close to end
+                    while (currentDist + MAX_LEN < dist - 0.1) { // 0.1 tolerance
+                        currentDist += MAX_LEN;
+
+                        const newX = startNode.x + dirX * currentDist;
+                        const newY = startNode.y + dirY * currentDist;
+
+                        // Rounding to avoid float precision issues (snap to grid essentially if aligned)
+                        // But let's keep it precise based on vector
+
+                        let targetNodeId = `node_split_${Date.now()}_${currentDist}`;
+
+                        // Check proximity to existing nodes
+                        const existingNode = nodes.find(n => Math.abs(n.x - newX) < 0.1 && Math.abs(n.y - newY) < 0.1);
+
+                        if (existingNode) {
+                            targetNodeId = existingNode.id;
+                        } else {
+                            // First check in our newNodes list to avoid dupes in this batch
+                            const alreadyCreated = newNodes.find(n => Math.abs(n.x - newX) < 0.1 && Math.abs(n.y - newY) < 0.1);
+                            if (alreadyCreated) {
+                                targetNodeId = alreadyCreated.id;
+                            } else {
+                                const newNode: Node = {
+                                    id: targetNodeId,
+                                    x: newX,
+                                    y: newY,
+                                    type: 'normal'
+                                };
+                                newNodes.push(newNode);
+                            }
+                        }
+
+                        newBeams.push({
+                            id: `beam_split_${Date.now()}_${currentDist}`,
+                            startNodeId: prevNodeId,
+                            endNodeId: targetNodeId,
+                            material: selectedMaterial
+                        });
+
+                        prevNodeId = targetNodeId;
+                    }
+
+                    // Final beam to endNode (whatever remains)
+                    newBeams.push({
+                        id: `beam_split_${Date.now()}_last`,
+                        startNodeId: prevNodeId,
+                        endNodeId: endNodeId,
+                        material: selectedMaterial
+                    });
+
+                    set(state => ({
+                        nodes: [...state.nodes, ...newNodes],
+                        beams: [...state.beams, ...newBeams]
+                    }));
+
+                } else {
+                    // Normal creation (single beam)
+                    addBeam(selectedNodeId, endNodeId, selectedMaterial);
+                }
+            }
         }
         set({
             selectedNodeId: null,

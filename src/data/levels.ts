@@ -19,16 +19,16 @@ export const LEVELS: LevelData[] = [
         name: 'Tutorial Bridge',
         budget: 500,
         anchors: [
-            { x: -5, y: -2 },
-            { x: 5, y: -2 },
+            { x: -4.5, y: -2 },
+            { x: 4.5, y: -2 },
         ],
-        vehicleStart: { x: -12, y: -1 }, // Start slightly above platform
+        vehicleStart: { x: -12, y: -1 },
         vehicleTarget: 10,
         waterLevel: -6,
-        gap: 10,
-        platformLeftX: -15,   // Center at -15 start
-        platformRightX: 15,   // Center at 15 end
-        platformY: -2,        // Platform surface level (match anchors)
+        gap: 9,
+        platformLeftX: -14.5,   // -4.5 (edge) - 10 (half width)
+        platformRightX: 14.5,   // 4.5 (edge) + 10 (half width)
+        platformY: -2,
         platformWidth: 20,
         timeLimit: 10
     },
