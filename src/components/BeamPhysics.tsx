@@ -1,11 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useBox, usePointToPointConstraint } from '@react-three/cannon';
 import { useGameStore } from '../store/gameStore';
-import { MATERIALS, getStressColor } from '../utils/materials';
+import { MATERIALS } from '../utils/materials';
 import { MaterialType } from '../types';
 import * as THREE from 'three';
-import { Mesh } from 'three';
+import { Mesh, RepeatWrapping } from 'three';
+import { useThree } from '@react-three/fiber';
+import { getRoadTexture } from '../utils/roadTexture';
 
 interface BeamPhysicsProps {
     id: string;
@@ -26,7 +27,8 @@ const IntactBeam = ({
     endBodyData,
 }: BeamPhysicsProps & { startBodyData: any, endBodyData: any }) => {
     const { breakBeam } = useGameStore();
-    const [currentForce, setCurrentForce] = useState(0);
+    const gl = useThree((state) => state.gl);
+    const [, setCurrentForce] = useState(0); // Kept for logic, but not used for color anymore
 
     // Calculate Geometry
     const startNode = useGameStore((s) => s.getNodeById(startNodeId));
@@ -50,18 +52,38 @@ const IntactBeam = ({
 
     const materialProps = MATERIALS[material];
     const isRoad = materialProps.isRoad;
+
+    // Dynamic Road Texture
+    const texture = useMemo(() => {
+        if (material === 'road') {
+            const baseTex = getRoadTexture();
+            if (baseTex) {
+                const tex = baseTex.clone();
+                tex.wrapS = RepeatWrapping;
+                tex.wrapT = RepeatWrapping;
+                tex.repeat.set(length / 5, 1);
+                const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+                tex.anisotropy = Math.min(16, maxAnisotropy);
+                tex.needsUpdate = true;
+                return tex;
+            }
+        }
+        return null;
+    }, [material, length, gl]);
+
     const collisionMask = isRoad ? 2 : 0;
     const damping = isRoad ? 0.5 : 0.1;
-
-    // HACK: Increase collision thickness for roads to prevent tunneling
     const collisionThickness = isRoad ? 0.5 : customThickness;
+
+    // Visual Depth
+    const depth = isRoad ? 3 : 0.4;
 
     // Physics Body
     const [beamRef] = useBox(() => ({
-        mass: 0.05, // Significantly reduced mass to prevent self-collapse
+        mass: 0.05,
         position: [midX, midY, 0],
         rotation: [0, 0, angle],
-        args: [length, collisionThickness, 5],
+        args: [length, collisionThickness, 5], // Physics depth remains 5 for safety
         collisionFilterGroup: 4,
         collisionFilterMask: collisionMask,
         angularFactor: [0, 0, 1] as [number, number, number],
@@ -69,19 +91,18 @@ const IntactBeam = ({
         angularDamping: damping,
     }));
 
-    // Constraint 1 (Start)
+    // Constraints
     usePointToPointConstraint(beamRef, startBodyData.ref, {
         pivotA: [-length / 2, 0, 0],
         pivotB: [0, 0, 0],
     });
 
-    // Constraint 2 (End)
     usePointToPointConstraint(beamRef, endBodyData.ref, {
         pivotA: [length / 2, 0, 0],
         pivotB: [0, 0, 0],
     });
 
-    // Re-implementing the stress logic properly
+    // Stress Logic (Kept for breaking, removed for coloring)
     useEffect(() => {
         if (!startBodyData.api || !endBodyData.api) return;
 
@@ -93,13 +114,10 @@ const IntactBeam = ({
 
         let checkInterval: NodeJS.Timeout;
 
-        // Delay stress check to let physics settle (1s grace period)
         const startTimeout = setTimeout(() => {
             checkInterval = setInterval(() => {
                 const dist = p1.distanceTo(p2);
                 const strain = Math.abs(dist - length);
-
-                // Force = Strain * Stiffness
                 const force = strain * materialProps.stiffness;
 
                 setCurrentForce(force);
@@ -118,14 +136,12 @@ const IntactBeam = ({
         };
     }, [breakBeam, id, length, materialProps, startBodyData, endBodyData]);
 
-
-    const stressColor = getStressColor(currentForce, materialProps.strength);
-
     return (
         <mesh ref={beamRef as React.Ref<Mesh>}>
-            <boxGeometry args={[length, customThickness, 1]} />
+            <boxGeometry args={[length, customThickness, depth]} />
             <meshStandardMaterial
-                color={stressColor}
+                color={texture ? '#ffffff' : materialProps.color} // Use texture or original color
+                map={texture}
                 transparent={!isRoad}
                 opacity={1}
             />
@@ -133,10 +149,8 @@ const IntactBeam = ({
     );
 };
 
+// ... (BrokenBeam remains mostly same but allows texture)
 
-// ==========================================
-// 2. BROKEN BEAM (Connected at one end only)
-// ==========================================
 const BrokenBeam = ({
     id,
     startNodeId,
@@ -144,10 +158,9 @@ const BrokenBeam = ({
     material,
     startBodyData,
 }: BeamPhysicsProps & { startBodyData: any }) => {
-    // Only connect to Start Node, let end dangle.
-
     const startNode = useGameStore((s) => s.getNodeById(startNodeId));
     const endNode = useGameStore((s) => s.getNodeById(endNodeId));
+    const gl = useThree((state) => state.gl);
 
     const { length, midX, midY, angle, customThickness } = useMemo(() => {
         if (!startNode || !endNode) return { length: 1, midX: 0, midY: 0, angle: 0, customThickness: 0.1 };
@@ -164,8 +177,26 @@ const BrokenBeam = ({
 
     const materialProps = MATERIALS[material];
     const isRoad = materialProps.isRoad;
+    const depth = isRoad ? 3 : 0.4;
 
-    // Physics Body - Same props but different behavior
+    // Texture for broken beam too
+    const texture = useMemo(() => {
+        if (material === 'road') {
+            const baseTex = getRoadTexture();
+            if (baseTex) {
+                const tex = baseTex.clone();
+                tex.wrapS = RepeatWrapping;
+                tex.wrapT = RepeatWrapping;
+                tex.repeat.set(length / 5, 1);
+                const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+                tex.anisotropy = Math.min(16, maxAnisotropy);
+                tex.needsUpdate = true;
+                return tex;
+            }
+        }
+        return null;
+    }, [material, length, gl]);
+
     const [beamRef] = useBox(() => ({
         mass: 0.05,
         position: [midX, midY, 0],
@@ -178,7 +209,6 @@ const BrokenBeam = ({
         angularDamping: 0.1,
     }));
 
-    // Constraint 1 Only (Start) - Dangles from here
     usePointToPointConstraint(beamRef, startBodyData.ref, {
         pivotA: [-length / 2, 0, 0],
         pivotB: [0, 0, 0],
@@ -186,9 +216,10 @@ const BrokenBeam = ({
 
     return (
         <mesh ref={beamRef as React.Ref<Mesh>}>
-            <boxGeometry args={[length, customThickness, 1]} />
+            <boxGeometry args={[length, customThickness, depth]} />
             <meshStandardMaterial
-                color={isRoad ? '#555' : '#8B0000'} // Gray or Dark Red to show damage
+                color={texture ? '#888888' : '#8B0000'} // Darker if broken texture, or red
+                map={texture}
                 transparent
                 opacity={0.8}
             />
@@ -196,10 +227,6 @@ const BrokenBeam = ({
     );
 };
 
-
-// ==========================================
-// 3. MAIN WRAPPER
-// ==========================================
 const BeamPhysicsWrapper = (props: BeamPhysicsProps) => {
     const { getPhysicsBody, brokenBeamIds } = useGameStore();
 
@@ -213,11 +240,9 @@ const BeamPhysicsWrapper = (props: BeamPhysicsProps) => {
     const isBroken = brokenBeamIds.has(props.id);
 
     if (isBroken) {
-        // Render broken version (dangling)
         return <BrokenBeam {...props} startBodyData={startBodyData} />;
     }
 
-    // Render intact version
     return <IntactBeam {...props} startBodyData={startBodyData} endBodyData={endBodyData} />;
 };
 
