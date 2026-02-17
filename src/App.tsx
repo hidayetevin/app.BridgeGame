@@ -34,7 +34,7 @@ function App() {
             {gameState.mode === 'simulation' && (
                 <div style={{
                     position: 'absolute',
-                    top: '80px', // Moved down below buttons
+                    top: '120px', // Moved down below buttons and materials
                     left: '50%',
                     transform: 'translateX(-50%)',
                     color: timeLeft <= 5 ? '#f44336' : 'white', // Red if low time
@@ -167,7 +167,8 @@ function App() {
                     textAlign: 'center',
                     color: 'white',
                     backdropFilter: 'blur(10px)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                    zIndex: 100 // Ensure modal is on top
                 }}>
                     <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</div>
                     <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>LEVEL COMPLETE!</div>
@@ -222,7 +223,8 @@ function App() {
                     textAlign: 'center',
                     color: 'white',
                     backdropFilter: 'blur(10px)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                    zIndex: 100
                 }}>
                     <div style={{ fontSize: '64px', marginBottom: '16px' }}>💀</div>
                     <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
@@ -248,22 +250,25 @@ function App() {
                 </div>
             )}
 
-            {/* Material Selector - Bottom Left (Above Level Selector) */}
+            {/* Material Selector - Top Center (Below Play/Reset) */}
             <div style={{
                 position: 'absolute',
-                bottom: '100px', // Adjusted to be above levels
-                left: '16px',
+                top: '64px', // Below play buttons (16px + ~40px height + gap)
+                left: '50%',
+                transform: 'translateX(-50%)',
                 color: 'white',
                 fontSize: '14px',
                 background: 'rgba(0,0,0,0.5)',
-                padding: '12px 16px',
+                padding: '8px 16px',
                 borderRadius: '8px',
                 backdropFilter: 'blur(4px)',
                 display: 'flex',
                 gap: '8px',
-                flexDirection: 'column'
+                flexDirection: 'row',
+                alignItems: 'center',
+                zIndex: 10 // Ensure on top
             }}>
-                <div style={{ fontWeight: 'bold' }}>Materials:</div>
+                {/* <div style={{ fontWeight: 'bold', marginRight: '4px' }}>Mat:</div> */}
                 {([
                     { id: 'road', name: '🛣️ Road', color: '#343a40' },
                     { id: 'wood', name: '🪵 Wood', color: '#8B4513' },
@@ -276,17 +281,18 @@ function App() {
                         style={{
                             background: selectedMaterial === mat.id ? mat.color : 'rgba(255,255,255,0.1)',
                             color: 'white',
-                            padding: '8px 16px',
+                            padding: '6px 12px',
                             borderRadius: '6px',
                             fontWeight: 'bold',
                             border: selectedMaterial === mat.id ? '2px solid white' : '1px solid transparent',
                             cursor: gameState.mode === 'simulation' ? 'not-allowed' : 'pointer',
-                            textAlign: 'left',
+                            textAlign: 'center',
                             opacity: gameState.mode === 'simulation' ? 0.5 : 1,
                             transition: 'all 0.2s',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px'
+                            gap: '6px',
+                            fontSize: '13px'
                         }}
                     >
                         <span>{mat.name}</span>
