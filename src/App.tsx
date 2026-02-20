@@ -121,7 +121,9 @@ function App() {
                         backdropFilter: 'blur(4px)',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '4px'
+                        gap: '4px',
+                        zIndex: 50,
+                        pointerEvents: 'none'
                     }}>
                         <div style={{ fontSize: '20px', letterSpacing: '4px', textAlign: 'center', marginBottom: '4px' }}>
                             {Array.from({ length: 3 }).map((_, i) => (
@@ -140,7 +142,9 @@ function App() {
                         left: '50%',
                         transform: 'translateX(-50%)',
                         display: 'flex',
-                        gap: '12px'
+                        gap: '12px',
+                        zIndex: 100,
+                        pointerEvents: 'auto'
                     }}>
                         {/* Play/Stop Button */}
                         <button
@@ -329,7 +333,7 @@ function App() {
                         gap: '8px',
                         flexDirection: 'row',
                         alignItems: 'center',
-                        zIndex: 10 // Ensure on top
+                        zIndex: 50 // Ensure on top
                     }}>
                         {/* <div style={{ fontWeight: 'bold', marginRight: '4px' }}>Mat:</div> */}
                         {([
