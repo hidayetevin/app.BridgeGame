@@ -326,72 +326,7 @@ function App() {
                         ))}
                     </div>
 
-                    {/* Level Selector - Bottom Left */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '16px',
-                        left: '16px',
-                        color: 'white',
-                        fontSize: '14px',
-                        background: 'rgba(0,0,0,0.5)',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(4px)'
-                    }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>{t.select_level}</div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            {LEVELS.map((level, index) => (
-                                <button
-                                    key={level.id}
-                                    onClick={() => loadLevel(index)}
-                                    disabled={gameState.mode === 'simulation'}
-                                    style={{
-                                        background: gameState.levelIndex === index ? 'rgba(33, 150, 243, 0.8)' : 'rgba(255,255,255,0.2)',
-                                        color: 'white',
-                                        padding: '8px 16px',
-                                        borderRadius: '6px',
-                                        fontWeight: 'bold',
-                                        border: 'none',
-                                        cursor: gameState.mode === 'simulation' ? 'not-allowed' : 'pointer',
-                                        opacity: gameState.mode === 'simulation' ? 0.5 : 1
-                                    }}
-                                >
-                                    {index + 1}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
 
-                    {/* Instructions - Bottom Right */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '16px',
-                        right: '16px',
-                        color: 'white',
-                        fontSize: '12px',
-                        background: 'rgba(0,0,0,0.7)',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(4px)',
-                        maxWidth: '300px'
-                    }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>📋 {t.how_to_play}</div>
-                        <div style={{ opacity: 0.9, lineHeight: '1.5' }}>
-                            {gameState.mode === 'editor' ? (
-                                <>
-                                    {t.inst_ed_1}<br />
-                                    {t.inst_ed_2}<br />
-                                    {t.inst_ed_3}
-                                </>
-                            ) : (
-                                <>
-                                    {t.inst_sim_1}<br />
-                                    {t.inst_sim_2}<br />
-                                    {t.inst_sim_3}
-                                </>
-                            )}
-                        </div>
-                    </div>
 
                     {/* Pause Modal */}
                     {isPaused && (
