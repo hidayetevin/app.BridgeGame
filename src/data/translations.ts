@@ -40,7 +40,8 @@ export const translations = {
         pause: 'Paused',
         resume: 'Resume',
         restart: 'Restart',
-        main_menu: 'Main Menu'
+        main_menu: 'Main Menu',
+        undo: 'Undo'
     },
     tr: {
         title: 'Köprü İnşası',
@@ -81,6 +82,7 @@ export const translations = {
         pause: 'Duraklatıldı',
         resume: 'Devam Et',
         restart: 'Yeniden Başla',
-        main_menu: 'Ana Menü'
+        main_menu: 'Ana Menü',
+        undo: 'Geri Al'
     }
 };

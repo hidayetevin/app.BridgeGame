@@ -7,7 +7,7 @@ import { LEVELS } from './data/levels';
 import { translations } from './data/translations';
 
 function App() {
-    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime } = useGameStore();
+    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
     const t = translations[gameState.language];
     const [isPaused, setIsPaused] = useState(false);
@@ -151,24 +151,32 @@ function App() {
                             {gameState.mode === 'editor' ? `▶️ ${t.play_btn}` : `⏸️ ${t.stop_btn}`}
                         </button>
 
-                        {/* Reset Button */}
+                        {/* Undo Button */}
                         <button
-                            onClick={resetLevel}
+                            onClick={undo}
+                            disabled={gameState.mode !== 'editor' || history.length === 0}
                             style={{
-                                background: 'rgba(239, 68, 68, 0.8)',
+                                background: 'rgba(33, 150, 243, 0.8)',
                                 color: 'white',
                                 padding: '8px 24px',
                                 borderRadius: '8px',
                                 fontWeight: 'bold',
                                 border: 'none',
-                                cursor: 'pointer',
+                                cursor: (gameState.mode !== 'editor' || history.length === 0) ? 'not-allowed' : 'pointer',
                                 backdropFilter: 'blur(4px)',
-                                transition: 'background 0.2s'
+                                transition: 'background 0.2s',
+                                opacity: (gameState.mode !== 'editor' || history.length === 0) ? 0.5 : 1
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(220, 38, 38, 0.9)'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.8)'}
+                            onMouseEnter={(e) => {
+                                if (gameState.mode === 'editor' && history.length > 0) {
+                                    e.currentTarget.style.background = 'rgba(30, 136, 229, 0.9)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(33, 150, 243, 0.8)';
+                            }}
                         >
-                            🔄 {t.reset_btn}
+                            ↩️ {t.undo}
                         </button>
                     </div>
 

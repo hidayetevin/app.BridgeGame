@@ -8,10 +8,19 @@ interface PhysicsBodyData {
     api: any; // Cannon API (for position/velocity)
 }
 
+interface ActionRecord {
+    type: 'add_beam' | 'remove_beam';
+    addedNodes: Node[];
+    addedBeams: Beam[];
+    removedBeams: Beam[];
+    costChange: number;
+}
+
 interface GameStore {
     // Graph Data
     nodes: Node[];
     beams: Beam[];
+    history: ActionRecord[];
 
     // Game State
     gameState: GameState;
@@ -51,7 +60,9 @@ interface GameStore {
     updateGhostBeam: (x: number, y: number) => void;
     finishDrawingBeam: (endNodeId: string) => void;
     cancelDrawingBeam: () => void;
-    selectMaterial: (material: MaterialType) => void; // New Action
+    selectMaterial: (material: MaterialType) => void;
+    undo: () => void;
+    recordAction: (type: 'add_beam' | 'remove_beam', addedNodes: Node[], addedBeams: Beam[], removedBeams: Beam[], costChange: number) => void;
 
     // Actions - Physics
     registerPhysicsBody: (nodeId: string, ref: any, api: any) => void;
@@ -77,6 +88,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Initial State
     nodes: [],
     beams: [],
+    history: [],
     gameState: {
         screen: 'menu',
         language: 'tr',
@@ -98,6 +110,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Node Actions
     addNode: (x, y, type = 'normal') => {
+        // Normally nodes are added during drawing beams, but exposed just in case. 
+        // We will not record isolated node additions unless they are part of a beam.
         const newNode: Node = {
             id: `node_${Date.now()}_${Math.random()}`,
             x,
@@ -121,6 +135,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     getNodeAt: (x, y) => {
         return get().nodes.find((n) => n.x === x && n.y === y);
+    },
+
+    recordAction: (type, addedNodes, addedBeams, removedBeams, costChange) => {
+        set((state) => ({
+            history: [...state.history, { type, addedNodes, addedBeams, removedBeams, costChange }]
+        }));
     },
 
     // Beam Actions
@@ -156,6 +176,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 spent: prevState.gameState.spent + cost
             }
         }));
+
+        get().recordAction('add_beam', [], [newBeam], [], cost);
     },
 
     removeBeam: (id) => {
@@ -182,6 +204,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 spent: Math.max(0, prevState.gameState.spent - refund)
             }
         }));
+
+        get().recordAction('remove_beam', [], [], [beam], -refund);
     },
 
     getBeamBetween: (nodeId1, nodeId2) => {
@@ -213,7 +237,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     finishDrawingBeam: (endNodeId) => {
-        const { selectedNodeId, addBeam, selectedMaterial, nodes, gameState } = get();
+        const { selectedNodeId, selectedMaterial, nodes, gameState } = get();
 
         if (selectedNodeId && endNodeId && selectedNodeId !== endNodeId) {
             const startNode = nodes.find(n => n.id === selectedNodeId);
@@ -309,11 +333,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         }
                     }));
 
+                    get().recordAction('add_beam', newNodes, newBeams, [], totalCost);
+
                 } else {
-                    // Normal creation (single beam) - delegating to addBeam which handles budget check inside
-                    // BUT addBeam is called from 'get()', so it uses current state.
-                    // addBeam uses set(), so we can just call it.
-                    addBeam(selectedNodeId, endNodeId, selectedMaterial);
+                    // Normal creation (single beam)
+                    // Let's create it manually so we can record it if it's not handled via split
+                    if (!get().getBeamBetween(startNode.id, endNode.id)) {
+                        const newBeam: Beam = {
+                            id: `beam_${Date.now()}_${Math.random()}`,
+                            startNodeId: startNode.id,
+                            endNodeId: endNode.id,
+                            material: selectedMaterial,
+                        };
+
+                        set((prevState) => ({
+                            beams: [...prevState.beams, newBeam],
+                            gameState: {
+                                ...prevState.gameState,
+                                spent: prevState.gameState.spent + totalCost
+                            }
+                        }));
+
+                        get().recordAction('add_beam', [], [newBeam], [], totalCost);
+                    }
                 }
             }
         }
@@ -334,6 +376,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     selectMaterial: (material) => {
         set({ selectedMaterial: material });
+    },
+
+    undo: () => {
+        const { history, gameState } = get();
+        if (history.length === 0 || gameState.mode !== 'editor') return;
+
+        const lastAction = history[history.length - 1];
+        set({ history: history.slice(0, -1) }); // Remove last action from history
+
+        if (lastAction.type === 'add_beam') {
+            // Undo add: remove the beams and nodes that were added
+            const addedNodeIds = new Set(lastAction.addedNodes.map(n => n.id));
+            const addedBeamIds = new Set(lastAction.addedBeams.map(b => b.id));
+
+            set(state => ({
+                nodes: state.nodes.filter(n => !addedNodeIds.has(n.id)),
+                beams: state.beams.filter(b => !addedBeamIds.has(b.id)),
+                gameState: {
+                    ...state.gameState,
+                    spent: Math.max(0, state.gameState.spent - lastAction.costChange)
+                }
+            }));
+        } else if (lastAction.type === 'remove_beam') {
+            // Undo remove: add the beams back (nodes are never removed completely on beam clear unless isolated, but we didn't wipe nodes)
+            set(state => ({
+                beams: [...state.beams, ...lastAction.removedBeams],
+                gameState: {
+                    ...state.gameState,
+                    spent: state.gameState.spent - lastAction.costChange // costChange for removed is negative, subtracting it adds to cost
+                }
+            }));
+        }
     },
 
     // Physics Actions
@@ -418,6 +492,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({
             nodes: [],
             beams: [],
+            history: [],
             selectedNodeId: null,
             isDrawingBeam: false,
             ghostBeamEnd: null,
