@@ -36,7 +36,11 @@ export const translations = {
         mat_steel: 'Steel',
         lvl_0: 'Tutorial Bridge',
         lvl_1: 'The Valley',
-        lvl_2: 'Canyon Crossing'
+        lvl_2: 'Canyon Crossing',
+        pause: 'Paused',
+        resume: 'Resume',
+        restart: 'Restart',
+        main_menu: 'Main Menu'
     },
     tr: {
         title: 'Köprü İnşası',
@@ -73,6 +77,10 @@ export const translations = {
         mat_steel: 'Çelik',
         lvl_0: 'Eğitim Köprüsü',
         lvl_1: 'Vadi',
-        lvl_2: 'Kanyon Geçişi'
+        lvl_2: 'Kanyon Geçişi',
+        pause: 'Duraklatıldı',
+        resume: 'Devam Et',
+        restart: 'Yeniden Başla',
+        main_menu: 'Ana Menü'
     }
 };

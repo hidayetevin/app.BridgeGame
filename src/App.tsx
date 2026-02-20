@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Scene from './components/Scene';
 import MenuScreen from './components/MenuScreen';
 import SettingsScreen from './components/SettingsScreen';
@@ -7,9 +7,10 @@ import { LEVELS } from './data/levels';
 import { translations } from './data/translations';
 
 function App() {
-    const { nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime } = useGameStore();
+    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
     const t = translations[gameState.language];
+    const [isPaused, setIsPaused] = useState(false);
 
     // Initialize level on mount
     useEffect(() => {
@@ -21,13 +22,13 @@ function App() {
     // Timer Logic
     useEffect(() => {
         let interval: NodeJS.Timeout;
-        if (isTimerRunning && timeLeft > 0) {
+        if (isTimerRunning && !isPaused && timeLeft > 0) {
             interval = setInterval(() => {
                 decrementTime();
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [isTimerRunning, timeLeft, decrementTime]);
+    }, [isTimerRunning, timeLeft, decrementTime, isPaused]);
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -63,29 +64,34 @@ function App() {
                         </div>
                     )}
 
-                    {/* UI Overlay - Top Left */}
-                    <div style={{
-                        position: 'absolute',
-                        top: '16px',
-                        left: '16px',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '18px',
-                        background: 'rgba(0,0,0,0.5)',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        backdropFilter: 'blur(4px)'
-                    }}>
-                        🌉 {t.title}
-                        <div style={{
-                            fontSize: '12px',
-                            fontWeight: 'normal',
-                            marginTop: '4px',
-                            opacity: 0.75
-                        }}>
-                            {t.level} {gameState.levelIndex + 1}: {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
-                        </div>
-                    </div>
+                    {/* Pause Button - Top Left */}
+                    <button
+                        onClick={() => setIsPaused(true)}
+                        style={{
+                            position: 'absolute',
+                            top: '16px',
+                            left: '16px',
+                            background: 'rgba(0,0,0,0.5)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '48px',
+                            height: '48px',
+                            backdropFilter: 'blur(4px)',
+                            transition: 'background 0.2s',
+                            zIndex: 90
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+                    >
+                        ⏸️
+                    </button>
 
                     {/* Stats Overlay - Top Right */}
                     <div style={{
@@ -378,6 +384,80 @@ function App() {
                             )}
                         </div>
                     </div>
+
+                    {/* Pause Modal */}
+                    {isPaused && (
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            background: 'rgba(0,0,0,0.7)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: 'white',
+                            backdropFilter: 'blur(10px)',
+                            zIndex: 1000
+                        }}>
+                            <h2 style={{ fontSize: '36px', marginBottom: '32px', fontWeight: 'bold' }}>{t.pause}</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '250px' }}>
+                                <button
+                                    onClick={() => setIsPaused(false)}
+                                    style={{
+                                        background: '#4CAF50',
+                                        color: 'white',
+                                        padding: '16px',
+                                        borderRadius: '8px',
+                                        fontSize: '18px',
+                                        fontWeight: 'bold',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    ▶️ {t.resume}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsPaused(false);
+                                        resetLevel();
+                                    }}
+                                    style={{
+                                        background: '#2196F3',
+                                        color: 'white',
+                                        padding: '16px',
+                                        borderRadius: '8px',
+                                        fontSize: '18px',
+                                        fontWeight: 'bold',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    🔄 {t.restart}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsPaused(false);
+                                        setScreen('menu');
+                                    }}
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.2)',
+                                        color: 'white',
+                                        padding: '16px',
+                                        borderRadius: '8px',
+                                        fontSize: '18px',
+                                        fontWeight: 'bold',
+                                        border: '2px solid rgba(255, 255, 255, 0.4)',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    🏠 {t.main_menu}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </div>
