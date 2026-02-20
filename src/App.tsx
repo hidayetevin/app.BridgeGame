@@ -89,7 +89,7 @@ function App() {
             }}>
                 <div>Nodes: {nodes.length}</div>
                 <div>Beams: {beams.length}</div>
-                <div>Budget: ${currentLevel.budget}</div>
+                <div>Budget: ${(currentLevel.budget - gameState.spent).toFixed(2)}</div>
             </div>
 
             {/* Control Buttons */}

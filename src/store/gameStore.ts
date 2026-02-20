@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Node, Beam, MaterialType, GameState } from '../types';
 import { LEVELS } from '../data/levels';
+import { MATERIALS } from '../utils/materials';
 
 interface PhysicsBodyData {
     ref: any; // RefObject (for constraints)
@@ -120,9 +121,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Beam Actions
     addBeam: (startNodeId, endNodeId, material) => {
-        if (get().getBeamBetween(startNodeId, endNodeId)) return;
+        const state = get();
+        if (state.getBeamBetween(startNodeId, endNodeId)) return;
 
-        // Check budget logic would go here
+        const startNode = state.getNodeById(startNodeId);
+        const endNode = state.getNodeById(endNodeId);
+        if (!startNode || !endNode) return;
+
+        const dx = endNode.x - startNode.x;
+        const dy = endNode.y - startNode.y;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const cost = length * MATERIALS[material].cost;
+
+        if (state.gameState.spent + cost > state.gameState.budget) {
+            console.warn('Budget exceeded!');
+            return;
+        }
 
         const newBeam: Beam = {
             id: `beam_${Date.now()}_${Math.random()}`,
@@ -130,12 +144,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
             endNodeId,
             material,
         };
-        set((state) => ({ beams: [...state.beams, newBeam] }));
+
+        set((prevState) => ({
+            beams: [...prevState.beams, newBeam],
+            gameState: {
+                ...prevState.gameState,
+                spent: prevState.gameState.spent + cost
+            }
+        }));
     },
 
     removeBeam: (id) => {
-        set((state) => ({
-            beams: state.beams.filter((b) => b.id !== id),
+        const state = get();
+        const beam = state.beams.find((b) => b.id === id);
+        if (!beam) return;
+
+        const startNode = state.getNodeById(beam.startNodeId);
+        const endNode = state.getNodeById(beam.endNodeId);
+
+        // Calculate refund
+        let refund = 0;
+        if (startNode && endNode) {
+            const dx = endNode.x - startNode.x;
+            const dy = endNode.y - startNode.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            refund = length * MATERIALS[beam.material].cost;
+        }
+
+        set((prevState) => ({
+            beams: prevState.beams.filter((b) => b.id !== id),
+            gameState: {
+                ...prevState.gameState,
+                spent: Math.max(0, prevState.gameState.spent - refund)
+            }
         }));
     },
 
@@ -168,7 +209,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
 
     finishDrawingBeam: (endNodeId) => {
-        const { selectedNodeId, addBeam, selectedMaterial, nodes } = get();
+        const { selectedNodeId, addBeam, selectedMaterial, nodes, gameState } = get();
 
         if (selectedNodeId && endNodeId && selectedNodeId !== endNodeId) {
             const startNode = nodes.find(n => n.id === selectedNodeId);
@@ -178,6 +219,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 const dx = endNode.x - startNode.x;
                 const dy = endNode.y - startNode.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
+                const totalCost = dist * MATERIALS[selectedMaterial].cost;
+
+                if (gameState.spent + totalCost > gameState.budget) {
+                    console.warn('Budget exceeded!');
+                    // Cancel drawing
+                    set({
+                        selectedNodeId: null,
+                        isDrawingBeam: false,
+                        ghostBeamEnd: null,
+                    });
+                    return;
+                }
+
                 const MAX_LEN = 3;
 
                 // Only split if it's Road and longer than MAX_LEN
@@ -244,11 +298,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
                     set(state => ({
                         nodes: [...state.nodes, ...newNodes],
-                        beams: [...state.beams, ...newBeams]
+                        beams: [...state.beams, ...newBeams],
+                        gameState: {
+                            ...state.gameState,
+                            spent: state.gameState.spent + totalCost
+                        }
                     }));
 
                 } else {
-                    // Normal creation (single beam)
+                    // Normal creation (single beam) - delegating to addBeam which handles budget check inside
+                    // BUT addBeam is called from 'get()', so it uses current state.
+                    // addBeam uses set(), so we can just call it.
                     addBeam(selectedNodeId, endNodeId, selectedMaterial);
                 }
             }

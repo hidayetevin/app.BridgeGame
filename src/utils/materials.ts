@@ -14,7 +14,7 @@ export const MATERIALS: Record<MaterialType, MaterialProps> = {
     road: {
         name: 'Asphalt Road',
         color: '#343a40', // Dark Asphalt
-        cost: 100,
+        cost: 10,
         strength: 500000, // 500k
         stiffness: 5e5, // Stiffer
         thickness: 0.25, // Thick road surface
@@ -23,7 +23,7 @@ export const MATERIALS: Record<MaterialType, MaterialProps> = {
     wood: {
         name: 'Wood Beam',
         color: '#8B4513', // Brown
-        cost: 10,
+        cost: 2.5,
         strength: 100000, // 100k
         stiffness: 2e5, // Very flexible
         thickness: 0.12, // Standard beam
@@ -32,7 +32,7 @@ export const MATERIALS: Record<MaterialType, MaterialProps> = {
     steel: {
         name: 'Steel Beam',
         color: '#708090', // Grey
-        cost: 50,
+        cost: 5,
         strength: 2000000, // 2 Million! Super strong
         stiffness: 2e6, // Very Stiff
         thickness: 0.15,
