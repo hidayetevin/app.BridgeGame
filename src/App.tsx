@@ -224,7 +224,7 @@ function App() {
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
                             background: 'rgba(76, 175, 80, 0.95)',
-                            padding: '40px',
+                            padding: 'clamp(20px, 4vh, 40px)',
                             borderRadius: '16px',
                             textAlign: 'center',
                             color: 'white',
@@ -232,14 +232,14 @@ function App() {
                             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                             zIndex: 100 // Ensure modal is on top
                         }}>
-                            <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</div>
-                            <div style={{ fontSize: '32px', letterSpacing: '8px', marginBottom: '16px' }}>
+                            <div style={{ fontSize: 'clamp(48px, 10vh, 64px)', marginBottom: 'max(8px, 2vh)' }}>🎉</div>
+                            <div style={{ fontSize: 'clamp(24px, 5vh, 32px)', letterSpacing: '8px', marginBottom: 'max(8px, 2vh)' }}>
                                 {Array.from({ length: 3 }).map((_, i) => (
                                     <span key={i} style={{ opacity: i < currentStars ? 1 : 0.3, filter: i < currentStars ? 'none' : 'grayscale(1)' }}>⭐</span>
                                 ))}
                             </div>
-                            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>{t.level_complete}</div>
-                            <div style={{ fontSize: '18px', marginBottom: '24px', opacity: 0.9 }}>
+                            <div style={{ fontSize: 'clamp(20px, 4vh, 32px)', fontWeight: 'bold', marginBottom: 'max(4px, 1vh)' }}>{t.level_complete}</div>
+                            <div style={{ fontSize: 'clamp(14px, 3vh, 18px)', marginBottom: 'max(16px, 3vh)', opacity: 0.9 }}>
                                 {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
                             </div>
                             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
@@ -251,9 +251,10 @@ function App() {
                                     style={{
                                         background: 'rgba(255,255,255,0.2)',
                                         color: 'white',
-                                        padding: '12px 24px',
+                                        padding: 'clamp(8px, 1.5vh, 12px) clamp(16px, 3.5vh, 24px)',
                                         borderRadius: '8px',
                                         fontWeight: 'bold',
+                                        fontSize: 'clamp(14px, 3vh, 18px)',
                                         border: '2px solid white',
                                         cursor: 'pointer'
                                     }}
@@ -269,9 +270,10 @@ function App() {
                                         style={{
                                             background: 'white',
                                             color: '#4CAF50',
-                                            padding: '12px 24px',
+                                            padding: 'clamp(8px, 1.5vh, 12px) clamp(16px, 3.5vh, 24px)',
                                             borderRadius: '8px',
                                             fontWeight: 'bold',
+                                            fontSize: 'clamp(14px, 3vh, 18px)',
                                             border: 'none',
                                             cursor: 'pointer'
                                         }}
@@ -291,7 +293,7 @@ function App() {
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
                             background: 'rgba(244, 67, 54, 0.95)',
-                            padding: '40px',
+                            padding: 'clamp(20px, 4vh, 40px)',
                             borderRadius: '16px',
                             textAlign: 'center',
                             color: 'white',
@@ -299,11 +301,11 @@ function App() {
                             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                             zIndex: 100
                         }}>
-                            <div style={{ fontSize: '64px', marginBottom: '16px' }}>💀</div>
-                            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+                            <div style={{ fontSize: 'clamp(48px, 10vh, 64px)', marginBottom: 'max(8px, 2vh)' }}>💀</div>
+                            <div style={{ fontSize: 'clamp(20px, 4vh, 32px)', fontWeight: 'bold', marginBottom: 'max(4px, 1vh)' }}>
                                 {timeLeft === 0 ? t.times_up : t.bridge_failed}
                             </div>
-                            <div style={{ fontSize: '18px', marginBottom: '24px', opacity: 0.9 }}>
+                            <div style={{ fontSize: 'clamp(14px, 3vh, 18px)', marginBottom: 'max(16px, 3vh)', opacity: 0.9 }}>
                                 {timeLeft === 0 ? t.out_of_time : t.vehicle_fell}
                             </div>
                             <button
@@ -314,9 +316,10 @@ function App() {
                                 style={{
                                     background: 'white',
                                     color: '#F44336',
-                                    padding: '12px 32px',
+                                    padding: 'clamp(8px, 1.5vh, 12px) clamp(16px, 3.5vh, 32px)',
                                     borderRadius: '8px',
                                     fontWeight: 'bold',
+                                    fontSize: 'clamp(14px, 3vh, 18px)',
                                     border: 'none',
                                     cursor: 'pointer'
                                 }}
