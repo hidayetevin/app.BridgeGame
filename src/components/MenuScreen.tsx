@@ -28,9 +28,9 @@ const MenuScreen: React.FC = () => {
             paddingBottom: '80px' // Space for AdMob Banner
         }}>
             <h1 style={{
-                fontSize: '48px',
+                fontSize: 'clamp(32px, 8vh, 64px)',
                 fontWeight: 'bold',
-                marginBottom: '48px',
+                marginBottom: '2vh',
                 textShadow: '0 4px 16px rgba(0,0,0,0.5)',
                 textAlign: 'center'
             }}>
@@ -38,9 +38,9 @@ const MenuScreen: React.FC = () => {
             </h1>
 
             <div style={{
-                fontSize: '24px',
+                fontSize: 'clamp(18px, 5vh, 32px)',
                 fontWeight: 'bold',
-                marginBottom: '48px',
+                marginBottom: '4vh',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -52,9 +52,9 @@ const MenuScreen: React.FC = () => {
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '24px',
+                gap: '2vh',
                 width: '100%',
-                maxWidth: '300px'
+                maxWidth: '400px'
             }}>
                 <div style={{
                     textAlign: 'center',
@@ -75,9 +75,9 @@ const MenuScreen: React.FC = () => {
                     style={{
                         background: '#4CAF50',
                         color: 'white',
-                        padding: '16px 24px',
+                        padding: 'max(8px, 2vh) 24px',
                         borderRadius: '12px',
-                        fontSize: '24px',
+                        fontSize: 'clamp(18px, 4vh, 28px)',
                         fontWeight: 'bold',
                         border: 'none',
                         cursor: 'pointer',
@@ -101,9 +101,9 @@ const MenuScreen: React.FC = () => {
                     style={{
                         background: 'rgba(255, 255, 255, 0.2)',
                         color: 'white',
-                        padding: '16px 24px',
+                        padding: 'max(8px, 2vh) 24px',
                         borderRadius: '12px',
-                        fontSize: '20px',
+                        fontSize: 'clamp(16px, 3.5vh, 24px)',
                         fontWeight: 'bold',
                         border: '2px solid rgba(255, 255, 255, 0.4)',
                         cursor: 'pointer',

@@ -23,9 +23,9 @@ const SettingsScreen: React.FC = () => {
             zIndex: 1000
         }}>
             <h2 style={{
-                fontSize: '36px',
+                fontSize: 'clamp(24px, 6vh, 48px)',
                 fontWeight: 'bold',
-                marginBottom: '40px',
+                marginBottom: '4vh',
                 textAlign: 'center'
             }}>
                 ⚙️ {t.settings}
@@ -33,21 +33,21 @@ const SettingsScreen: React.FC = () => {
 
             <div style={{
                 background: 'rgba(255, 255, 255, 0.1)',
-                padding: '32px',
+                padding: 'max(16px, 3vh) 32px',
                 borderRadius: '16px',
                 width: '100%',
                 maxWidth: '400px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '24px',
+                gap: '2vh',
                 border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t.version}</span>
-                    <span style={{ fontSize: '16px', opacity: 0.8 }}>1.0.0</span>
+                    <span style={{ fontSize: 'clamp(14px, 3vh, 18px)', fontWeight: 'bold' }}>{t.version}</span>
+                    <span style={{ fontSize: 'clamp(12px, 2.5vh, 16px)', opacity: 0.8 }}>1.0.0</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1vh' }}>
                     <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t.language}</span>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
@@ -86,12 +86,12 @@ const SettingsScreen: React.FC = () => {
                 <button
                     onClick={() => setScreen('menu')}
                     style={{
-                        marginTop: '24px',
+                        marginTop: '2vh',
                         background: 'rgba(239, 68, 68, 0.8)',
                         color: 'white',
-                        padding: '12px 24px',
+                        padding: 'max(8px, 1.5vh) 24px',
                         borderRadius: '8px',
-                        fontSize: '18px',
+                        fontSize: 'clamp(14px, 3.5vh, 18px)',
                         fontWeight: 'bold',
                         border: 'none',
                         cursor: 'pointer',
