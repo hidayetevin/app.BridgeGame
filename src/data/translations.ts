@@ -41,7 +41,8 @@ export const translations = {
         resume: 'Resume',
         restart: 'Restart',
         main_menu: 'Main Menu',
-        undo: 'Undo'
+        undo: 'Undo',
+        total_stars: 'Total Stars'
     },
     tr: {
         title: 'Köprü İnşası',
@@ -83,6 +84,7 @@ export const translations = {
         resume: 'Devam Et',
         restart: 'Yeniden Başla',
         main_menu: 'Ana Menü',
-        undo: 'Geri Al'
+        undo: 'Geri Al',
+        total_stars: 'Toplam Yıldız'
     }
 };

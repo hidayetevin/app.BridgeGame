@@ -21,6 +21,7 @@ export interface GameState {
     budget: number;
     spent: number;
     levelIndex: number;
+    levelStars: Record<number, number>;
 }
 
 export interface LevelData {

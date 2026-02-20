@@ -12,6 +12,12 @@ function App() {
     const t = translations[gameState.language];
     const [isPaused, setIsPaused] = useState(false);
 
+    // Calculate current stars
+    const percentSpent = (gameState.spent / currentLevel.budget) * 100;
+    let currentStars = 3;
+    if (percentSpent > 75) currentStars = 1;
+    else if (percentSpent > 40) currentStars = 2;
+
     // Initialize level on mount
     useEffect(() => {
         if (nodes.length === 0) {
@@ -103,8 +109,16 @@ function App() {
                         background: 'rgba(0,0,0,0.5)',
                         padding: '12px 16px',
                         borderRadius: '8px',
-                        backdropFilter: 'blur(4px)'
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
                     }}>
+                        <div style={{ fontSize: '20px', letterSpacing: '4px', textAlign: 'center', marginBottom: '4px' }}>
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <span key={i} style={{ opacity: i < currentStars ? 1 : 0.3, filter: i < currentStars ? 'none' : 'grayscale(1)' }}>⭐</span>
+                            ))}
+                        </div>
                         <div>{t.nodes}: {nodes.length}</div>
                         <div>{t.beams}: {beams.length}</div>
                         <div>{t.budget}: ${(currentLevel.budget - gameState.spent).toFixed(2)}</div>
@@ -197,6 +211,11 @@ function App() {
                             zIndex: 100 // Ensure modal is on top
                         }}>
                             <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</div>
+                            <div style={{ fontSize: '32px', letterSpacing: '8px', marginBottom: '16px' }}>
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <span key={i} style={{ opacity: i < currentStars ? 1 : 0.3, filter: i < currentStars ? 'none' : 'grayscale(1)' }}>⭐</span>
+                                ))}
+                            </div>
                             <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>{t.level_complete}</div>
                             <div style={{ fontSize: '18px', marginBottom: '24px', opacity: 0.9 }}>
                                 {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}

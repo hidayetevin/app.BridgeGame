@@ -99,6 +99,7 @@ export const useGameStore = create<GameStore>()(
                 budget: 0,
                 spent: 0,
                 levelIndex: 0,
+                levelStars: {},
             },
             selectedNodeId: null,
             isDrawingBeam: false,
@@ -476,9 +477,30 @@ export const useGameStore = create<GameStore>()(
             },
 
             setWon: (won) => {
-                const { hasLost } = get();
+                const { hasLost, gameState } = get();
                 if (!hasLost) {
-                    set({ hasWon: won, isTimerRunning: false });
+                    let maxStars = gameState.levelStars[gameState.levelIndex] || 0;
+
+                    if (won) {
+                        const percentSpent = (gameState.spent / gameState.budget) * 100;
+                        let currentStars = 1;
+                        if (percentSpent <= 40) currentStars = 3;
+                        else if (percentSpent <= 75) currentStars = 2;
+
+                        maxStars = Math.max(maxStars, currentStars);
+                    }
+
+                    set({
+                        hasWon: won,
+                        isTimerRunning: false,
+                        gameState: {
+                            ...gameState,
+                            levelStars: {
+                                ...gameState.levelStars,
+                                [gameState.levelIndex]: maxStars
+                            }
+                        }
+                    });
                 }
             },
             setLost: (lost) => {
@@ -512,6 +534,7 @@ export const useGameStore = create<GameStore>()(
                         budget: level.budget,
                         spent: 0,
                         levelIndex: index,
+                        levelStars: get().gameState?.levelStars || {},
                     },
                 });
 

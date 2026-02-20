@@ -8,6 +8,8 @@ const MenuScreen: React.FC = () => {
     const t = translations[gameState.language];
     const currentLevel = LEVELS[gameState.levelIndex];
 
+    const totalStars = Object.values(gameState.levelStars || {}).reduce((sum, stars) => sum + stars, 0);
+
     return (
         <div style={{
             position: 'absolute',
@@ -33,6 +35,18 @@ const MenuScreen: React.FC = () => {
             }}>
                 🌉 {t.title}
             </h1>
+
+            <div style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                marginBottom: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                textShadow: '0 2px 8px rgba(0,0,0,0.5)'
+            }}>
+                ⭐ {totalStars} {t.total_stars || 'Stars'}
+            </div>
 
             <div style={{
                 display: 'flex',
