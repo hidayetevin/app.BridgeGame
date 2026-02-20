@@ -15,7 +15,7 @@ function App() {
     // Initialize level on mount
     useEffect(() => {
         if (nodes.length === 0) {
-            loadLevel(0); // Load first level
+            loadLevel(useGameStore.getState().gameState.levelIndex); // Load current/saved level
         }
     }, []);
 

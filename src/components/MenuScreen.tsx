@@ -1,10 +1,12 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { translations } from '../data/translations';
+import { LEVELS } from '../data/levels';
 
 const MenuScreen: React.FC = () => {
     const { setScreen, gameState } = useGameStore();
     const t = translations[gameState.language];
+    const currentLevel = LEVELS[gameState.levelIndex];
 
     return (
         <div style={{
@@ -39,6 +41,20 @@ const MenuScreen: React.FC = () => {
                 width: '100%',
                 maxWidth: '300px'
             }}>
+                <div style={{
+                    textAlign: 'center',
+                    fontSize: '18px',
+                    opacity: 0.9,
+                    marginBottom: '-12px',
+                    fontWeight: 'bold',
+                    background: 'rgba(0,0,0,0.5)',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    {t.level} {gameState.levelIndex + 1}: {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
+                </div>
+
                 <button
                     onClick={() => setScreen('game')}
                     style={{
