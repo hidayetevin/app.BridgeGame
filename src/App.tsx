@@ -5,6 +5,7 @@ import SettingsScreen from './components/SettingsScreen';
 import { useGameStore } from './store/gameStore';
 import { LEVELS } from './data/levels';
 import { translations } from './data/translations';
+import { AdManager } from './utils/AdManager';
 
 function App() {
     const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history } = useGameStore();
@@ -23,6 +24,14 @@ function App() {
         if (nodes.length === 0) {
             loadLevel(useGameStore.getState().gameState.levelIndex); // Load current/saved level
         }
+
+        // Initialize and show AdMob Banner if on Native platform
+        const initAds = async () => {
+            await AdManager.init();
+            await AdManager.showBanner();
+            await AdManager.prepareInterstitial(); // preload for later
+        };
+        initAds();
     }, []);
 
     // Timer Logic
@@ -222,7 +231,10 @@ function App() {
                             </div>
                             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                                 <button
-                                    onClick={resetLevel}
+                                    onClick={async () => {
+                                        await AdManager.showInterstitial();
+                                        resetLevel();
+                                    }}
                                     style={{
                                         background: 'rgba(255,255,255,0.2)',
                                         color: 'white',
@@ -237,7 +249,10 @@ function App() {
                                 </button>
                                 {gameState.levelIndex < LEVELS.length - 1 && (
                                     <button
-                                        onClick={() => loadLevel(gameState.levelIndex + 1)}
+                                        onClick={async () => {
+                                            await AdManager.showInterstitial();
+                                            loadLevel(gameState.levelIndex + 1);
+                                        }}
                                         style={{
                                             background: 'white',
                                             color: '#4CAF50',
@@ -279,7 +294,10 @@ function App() {
                                 {timeLeft === 0 ? t.out_of_time : t.vehicle_fell}
                             </div>
                             <button
-                                onClick={resetLevel}
+                                onClick={async () => {
+                                    await AdManager.showInterstitial();
+                                    resetLevel();
+                                }}
                                 style={{
                                     background: 'white',
                                     color: '#F44336',
