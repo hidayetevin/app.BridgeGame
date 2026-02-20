@@ -6,6 +6,8 @@ import { useGameStore } from './store/gameStore';
 import { LEVELS } from './data/levels';
 import { translations } from './data/translations';
 import { AdManager } from './utils/AdManager';
+import { StatusBar } from '@capacitor/status-bar';
+import { Capacitor } from '@capacitor/core';
 
 function App() {
     const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history } = useGameStore();
@@ -26,12 +28,19 @@ function App() {
         }
 
         // Initialize and show AdMob Banner if on Native platform
-        const initAds = async () => {
+        const initNative = async () => {
+            if (Capacitor.isNativePlatform()) {
+                try {
+                    await StatusBar.hide();
+                } catch (e) {
+                    console.log('StatusBar hide error', e);
+                }
+            }
             await AdManager.init();
             await AdManager.showBanner();
             await AdManager.prepareInterstitial(); // preload for later
         };
-        initAds();
+        initNative();
     }, []);
 
     // Timer Logic

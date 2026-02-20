@@ -1,5 +1,4 @@
 import { Canvas } from '@react-three/fiber';
-import { Stats } from '@react-three/drei';
 import Camera from './Camera';
 import Grid from './Grid';
 import Cursor from './Cursor';
@@ -90,8 +89,6 @@ export default function Scene() {
             {/* SIMULATION MODE - Physics active */}
             {isSimulating && <PhysicsWorld />}
 
-            {/* Performance Stats */}
-            <Stats />
         </Canvas>
     );
 }

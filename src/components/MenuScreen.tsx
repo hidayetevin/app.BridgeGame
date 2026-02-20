@@ -24,7 +24,8 @@ const MenuScreen: React.FC = () => {
             background: 'rgba(0, 0, 0, 0.7)', // Semi-transparent overlay to see the 3D scene in the background
             backdropFilter: 'blur(8px)',
             color: 'white',
-            zIndex: 1000
+            zIndex: 1000,
+            paddingBottom: '80px' // Space for AdMob Banner
         }}>
             <h1 style={{
                 fontSize: '48px',
