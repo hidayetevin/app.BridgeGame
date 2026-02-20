@@ -201,13 +201,24 @@ export const useGameStore = create<GameStore>()(
                     refund = length * MATERIALS[beam.material].cost;
                 }
 
-                set((prevState) => ({
-                    beams: prevState.beams.filter((b) => b.id !== id),
-                    gameState: {
-                        ...prevState.gameState,
-                        spent: Math.max(0, prevState.gameState.spent - refund)
-                    }
-                }));
+                set((prevState) => {
+                    const newBeams = prevState.beams.filter((b) => b.id !== id);
+                    const connectedNodes = new Set<string>();
+                    newBeams.forEach(b => {
+                        connectedNodes.add(b.startNodeId);
+                        connectedNodes.add(b.endNodeId);
+                    });
+                    const newNodes = prevState.nodes.filter(n => n.type === 'anchor' || connectedNodes.has(n.id));
+
+                    return {
+                        nodes: newNodes,
+                        beams: newBeams,
+                        gameState: {
+                            ...prevState.gameState,
+                            spent: Math.max(0, prevState.gameState.spent - refund)
+                        }
+                    };
+                });
 
                 get().recordAction('remove_beam', [], [], [beam], -refund);
             },
@@ -390,18 +401,27 @@ export const useGameStore = create<GameStore>()(
                 set({ history: history.slice(0, -1) }); // Remove last action from history
 
                 if (lastAction.type === 'add_beam') {
-                    // Undo add: remove the beams and nodes that were added
-                    const addedNodeIds = new Set(lastAction.addedNodes.map(n => n.id));
+                    // Undo add: remove the beams that were added
                     const addedBeamIds = new Set(lastAction.addedBeams.map(b => b.id));
 
-                    set(state => ({
-                        nodes: state.nodes.filter(n => !addedNodeIds.has(n.id)),
-                        beams: state.beams.filter(b => !addedBeamIds.has(b.id)),
-                        gameState: {
-                            ...state.gameState,
-                            spent: Math.max(0, state.gameState.spent - lastAction.costChange)
+                    set(state => {
+                        const newBeams = state.beams.filter(b => !addedBeamIds.has(b.id));
+                        const connectedNodes = new Set<string>();
+                        newBeams.forEach(b => {
+                            connectedNodes.add(b.startNodeId);
+                            connectedNodes.add(b.endNodeId);
+                        });
+                        const newNodes = state.nodes.filter(n => n.type === 'anchor' || connectedNodes.has(n.id));
+
+                        return {
+                            nodes: newNodes,
+                            beams: newBeams,
+                            gameState: {
+                                ...state.gameState,
+                                spent: Math.max(0, state.gameState.spent - lastAction.costChange)
+                            }
                         }
-                    }));
+                    });
                 } else if (lastAction.type === 'remove_beam') {
                     // Undo remove: add the beams back (nodes are never removed completely on beam clear unless isolated, but we didn't wipe nodes)
                     set(state => ({
