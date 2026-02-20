@@ -152,7 +152,6 @@ const IntactBeam = ({
 // ... (BrokenBeam remains mostly same but allows texture)
 
 const BrokenBeam = ({
-    id,
     startNodeId,
     endNodeId,
     material,

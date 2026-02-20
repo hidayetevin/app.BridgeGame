@@ -10,7 +10,7 @@ interface GroundProps {
     color?: string;
 }
 
-export default function Ground({ x, y, width, height, color = '#4CAF50' }: GroundProps) {
+export default function Ground({ x, y, width, height }: GroundProps) {
     // Static physics body (mass = 0)
     const [ref] = useBox(() => ({
         mass: 0,

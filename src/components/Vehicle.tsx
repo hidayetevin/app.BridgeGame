@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { useBox, useSphere, useHingeConstraint } from '@react-three/cannon';
 import { useFrame } from '@react-three/fiber';
-import { Mesh, Vector3 } from 'three';
+import { Mesh } from 'three';
 import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
 

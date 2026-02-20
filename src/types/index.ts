@@ -15,6 +15,8 @@ export interface Beam {
 }
 
 export interface GameState {
+    screen: 'menu' | 'game' | 'settings';
+    language: 'en' | 'tr';
     mode: 'editor' | 'simulation';
     budget: number;
     spent: number;

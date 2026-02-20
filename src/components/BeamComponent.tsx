@@ -13,7 +13,7 @@ interface BeamComponentProps {
     material: MaterialType;
 }
 
-export default function BeamComponent({ id, startNodeId, endNodeId, material }: BeamComponentProps) {
+export default function BeamComponent({ startNodeId, endNodeId, material }: BeamComponentProps) {
     const { getNodeById, gameState } = useGameStore();
     const gl = useThree((state) => state.gl);
 

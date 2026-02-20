@@ -49,7 +49,7 @@ interface GameStore {
     // Actions - Construction
     startDrawingBeam: (nodeId: string) => void;
     updateGhostBeam: (x: number, y: number) => void;
-    finishDrawingBeam: (endNodeId: string, material: MaterialType) => void;
+    finishDrawingBeam: (endNodeId: string) => void;
     cancelDrawingBeam: () => void;
     selectMaterial: (material: MaterialType) => void; // New Action
 
@@ -64,6 +64,8 @@ interface GameStore {
     stopTimer: () => void;
 
     // Actions - Game State
+    setScreen: (screen: 'menu' | 'game' | 'settings') => void;
+    setLanguage: (lang: 'en' | 'tr') => void;
     setMode: (mode: 'editor' | 'simulation') => void;
     setWon: (won: boolean) => void;
     setLost: (lost: boolean) => void;
@@ -76,6 +78,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     nodes: [],
     beams: [],
     gameState: {
+        screen: 'menu',
+        language: 'tr',
         mode: 'editor',
         budget: 0,
         spent: 0,
@@ -373,6 +377,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     stopTimer: () => set({ isTimerRunning: false }),
 
     // Game State Actions
+    setScreen: (screen) => set((state) => ({ gameState: { ...state.gameState, screen } })),
+    setLanguage: (language) => set((state) => ({ gameState: { ...state.gameState, language } })),
     setMode: (mode) => {
         set((state) => {
             // Find current level time limit
@@ -422,6 +428,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
             timeLeft: 0,
             isTimerRunning: false,
             gameState: {
+                screen: get().gameState?.screen || 'menu',
+                language: get().gameState?.language || 'tr',
                 mode: 'editor',
                 budget: level.budget,
                 spent: 0,

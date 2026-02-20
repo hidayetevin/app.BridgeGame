@@ -1,0 +1,10 @@
+﻿src/components/BeamComponent.tsx(16,41): error TS6133: 'id' is declared but its value is never read.
+src/components/BeamPhysics.tsx(155,5): error TS6133: 'id' is declared but its value is never read.
+src/components/Cursor.tsx(67,21): error TS2554: Expected 2 arguments, but got 1.
+src/components/Cursor.tsx(73,25): error TS2554: Expected 2 arguments, but got 1.
+src/components/Ground.tsx(13,55): error TS6133: 'color' is declared but its value is never read.
+src/components/Vehicle.tsx(4,16): error TS6133: 'Vector3' is declared but its value is never read.
+src/data/levels.ts(33,9): error TS2353: Object literal may only specify known properties, and 'timeLimit' does not exist in type 'LevelData'.
+src/data/levels.ts(51,9): error TS2353: Object literal may only specify known properties, and 'timeLimit' does not exist in type 'LevelData'.
+src/data/levels.ts(69,9): error TS2353: Object literal may only specify known properties, and 'timeLimit' does not exist in type 'LevelData'.
+src/store/gameStore.ts(383,45): error TS2339: Property 'timeLimit' does not exist on type 'LevelData'.

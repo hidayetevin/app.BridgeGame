@@ -11,6 +11,7 @@ export interface LevelData {
     platformRightX: number; // Center X of right platform
     platformY: number;      // Y position of platform surface
     platformWidth: number;
+    timeLimit: number;
 }
 
 export const LEVELS: LevelData[] = [
