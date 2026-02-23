@@ -266,17 +266,19 @@ function App() {
                                 {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
                             </div>
 
-                            {/* 2x Button — shown first, hides after use or when other buttons appear */}
-                            {!doubleUsed && (
-                                <div style={{
-                                    marginBottom: showWinActions ? 'max(12px, 2vh)' : '0',
-                                    transition: 'margin 0.3s',
-                                }}>
+                            {/* 2x Button area — shows button before use, success badge after */}
+                            <div style={{
+                                marginBottom: 'max(12px, 2vh)',
+                                transition: 'margin 0.3s',
+                                display: 'flex',
+                                justifyContent: 'center',
+                            }}>
+                                {!doubleUsed ? (
                                     <button
                                         onClick={async () => {
                                             const success = await AdManager.showRewarded();
                                             if (success) {
-                                                AdManager.markRewardedWatched(); // skip next interstitial
+                                                AdManager.markRewardedWatched();
                                                 doubleStars();
                                                 setDoubleUsed(true);
                                                 setShowWinActions(true);
@@ -296,15 +298,36 @@ function App() {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '8px',
-                                            margin: '0 auto',
                                             animation: 'pulse-btn 1.5s ease-in-out infinite',
                                         }}
                                     >
                                         <span style={{ fontSize: '1.3em' }}>📺</span>
                                         ⭐ x2 {gameState.language === 'tr' ? 'Kazan' : 'Earn'}
                                     </button>
-                                </div>
-                            )}
+                                ) : (
+                                    <div style={{
+                                        background: 'rgba(255,255,255,0.15)',
+                                        border: '2px solid rgba(255,255,255,0.6)',
+                                        borderRadius: '12px',
+                                        padding: 'clamp(8px, 1.5vh, 14px) clamp(20px, 4vw, 36px)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        animation: 'fadein-badge 0.5s ease both',
+                                    }}>
+                                        <span style={{ fontSize: 'clamp(20px, 4vh, 28px)' }}>🎊</span>
+                                        <span style={{
+                                            fontSize: 'clamp(15px, 3.2vh, 20px)',
+                                            fontWeight: 'bold',
+                                            color: '#FFD700',
+                                            textShadow: '0 0 10px rgba(255,215,0,0.6)',
+                                        }}>
+                                            ⭐ x2 {gameState.language === 'tr' ? 'Kazandın!' : 'Earned!'}
+                                        </span>
+                                        <span style={{ fontSize: 'clamp(20px, 4vh, 28px)' }}>🎊</span>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Retry / Next Level — appear after 2 sec */}
                             <div style={{
