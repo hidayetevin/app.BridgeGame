@@ -85,6 +85,7 @@ interface GameStore {
     resetLevel: () => void;
     addBudget: (amount: number) => void;
     clearBudgetExceeded: () => void;
+    doubleStars: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -585,6 +586,22 @@ export const useGameStore = create<GameStore>()(
                         ...state.gameState,
                         budget: state.gameState.budget + amount,
                         budgetExceeded: false
+                    }
+                }));
+            },
+
+            doubleStars: () => {
+                const { gameState } = get();
+                const levelIndex = gameState.levelIndex;
+                const currentStars = gameState.levelStars[levelIndex] || 0;
+                const doubled = Math.min(currentStars * 2, 3);
+                set((state) => ({
+                    gameState: {
+                        ...state.gameState,
+                        levelStars: {
+                            ...state.gameState.levelStars,
+                            [levelIndex]: doubled
+                        }
                     }
                 }));
             },

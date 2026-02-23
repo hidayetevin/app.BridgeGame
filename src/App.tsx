@@ -10,10 +10,12 @@ import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
 function App() {
-    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded } = useGameStore();
+    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
     const t = translations[gameState.language];
     const [isPaused, setIsPaused] = useState(false);
+    const [showWinActions, setShowWinActions] = useState(false);
+    const [doubleUsed, setDoubleUsed] = useState(false);
 
     // Calculate current stars
     const percentSpent = (gameState.spent / currentLevel.budget) * 100;
@@ -42,6 +44,16 @@ function App() {
         };
         initNative();
     }, []);
+
+    // Double-star countdown when win modal appears
+    useEffect(() => {
+        if (hasWon) {
+            setShowWinActions(false);
+            setDoubleUsed(false);
+            const timer = setTimeout(() => setShowWinActions(true), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [hasWon]);
 
     // Timer Logic
     useEffect(() => {
@@ -230,19 +242,78 @@ function App() {
                             color: 'white',
                             backdropFilter: 'blur(10px)',
                             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                            zIndex: 100 // Ensure modal is on top
+                            zIndex: 100,
+                            minWidth: 'clamp(240px, 50vw, 380px)',
                         }}>
                             <div style={{ fontSize: 'clamp(48px, 10vh, 64px)', marginBottom: 'max(8px, 2vh)' }}>🎉</div>
+
+                            {/* Stars display */}
                             <div style={{ fontSize: 'clamp(24px, 5vh, 32px)', letterSpacing: '8px', marginBottom: 'max(8px, 2vh)' }}>
                                 {Array.from({ length: 3 }).map((_, i) => (
-                                    <span key={i} style={{ opacity: i < currentStars ? 1 : 0.3, filter: i < currentStars ? 'none' : 'grayscale(1)' }}>⭐</span>
+                                    <span
+                                        key={i}
+                                        style={{
+                                            opacity: i < (doubleUsed ? Math.min(currentStars * 2, 3) : currentStars) ? 1 : 0.3,
+                                            filter: i < (doubleUsed ? Math.min(currentStars * 2, 3) : currentStars) ? 'none' : 'grayscale(1)',
+                                            transition: 'opacity 0.4s, filter 0.4s',
+                                        }}
+                                    >⭐</span>
                                 ))}
                             </div>
+
                             <div style={{ fontSize: 'clamp(20px, 4vh, 32px)', fontWeight: 'bold', marginBottom: 'max(4px, 1vh)' }}>{t.level_complete}</div>
                             <div style={{ fontSize: 'clamp(14px, 3vh, 18px)', marginBottom: 'max(16px, 3vh)', opacity: 0.9 }}>
                                 {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
                             </div>
-                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+
+                            {/* 2x Button — shown first, hides after use or when other buttons appear */}
+                            {!doubleUsed && (
+                                <div style={{
+                                    marginBottom: showWinActions ? 'max(12px, 2vh)' : '0',
+                                    transition: 'margin 0.3s',
+                                }}>
+                                    <button
+                                        onClick={async () => {
+                                            const success = await AdManager.showRewarded();
+                                            if (success) {
+                                                doubleStars();
+                                                setDoubleUsed(true);
+                                                setShowWinActions(true);
+                                            }
+                                        }}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #FFD700, #FF8C00)',
+                                            color: '#1a1a1a',
+                                            padding: 'clamp(10px, 2vh, 16px) clamp(24px, 5vw, 40px)',
+                                            borderRadius: '12px',
+                                            fontWeight: 'bold',
+                                            fontSize: 'clamp(16px, 3.5vh, 22px)',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 16px rgba(255,165,0,0.5)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            margin: '0 auto',
+                                            animation: 'pulse-btn 1.5s ease-in-out infinite',
+                                        }}
+                                    >
+                                        <span style={{ fontSize: '1.3em' }}>📺</span>
+                                        ⭐ x2 {gameState.language === 'tr' ? 'Kazan' : 'Earn'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Retry / Next Level — appear after 2 sec */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '12px',
+                                justifyContent: 'center',
+                                opacity: showWinActions ? 1 : 0,
+                                transform: showWinActions ? 'translateY(0)' : 'translateY(8px)',
+                                transition: 'opacity 0.4s, transform 0.4s',
+                                pointerEvents: showWinActions ? 'auto' : 'none',
+                            }}>
                                 <button
                                     onClick={async () => {
                                         await AdManager.showInterstitial();
