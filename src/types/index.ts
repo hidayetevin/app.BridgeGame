@@ -21,7 +21,8 @@ export interface GameState {
     budget: number;
     spent: number;
     levelIndex: number;
-    levelStars: Record<number, number>;
+    levelStars: Record<number, number>;   // Per-level best score (1-3), for display
+    totalStarsEarned: number;             // Accumulated star currency (can exceed 3× levels)
     budgetExceeded: boolean;
 }
 

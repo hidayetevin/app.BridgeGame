@@ -85,7 +85,7 @@ interface GameStore {
     resetLevel: () => void;
     addBudget: (amount: number) => void;
     clearBudgetExceeded: () => void;
-    doubleStars: () => void;
+    doubleStars: (earnedStars: number) => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -103,6 +103,7 @@ export const useGameStore = create<GameStore>()(
                 spent: 0,
                 levelIndex: 0,
                 levelStars: {},
+                totalStarsEarned: 0,
                 budgetExceeded: false,
             },
             selectedNodeId: null,
@@ -510,6 +511,7 @@ export const useGameStore = create<GameStore>()(
                 const { hasLost, gameState } = get();
                 if (!hasLost) {
                     let maxStars = gameState.levelStars[gameState.levelIndex] || 0;
+                    let earnedThisRound = 0;
 
                     if (won) {
                         const percentSpent = (gameState.spent / gameState.budget) * 100;
@@ -517,6 +519,7 @@ export const useGameStore = create<GameStore>()(
                         if (percentSpent <= 40) currentStars = 3;
                         else if (percentSpent <= 75) currentStars = 2;
 
+                        earnedThisRound = currentStars;
                         maxStars = Math.max(maxStars, currentStars);
                     }
 
@@ -528,7 +531,9 @@ export const useGameStore = create<GameStore>()(
                             levelStars: {
                                 ...gameState.levelStars,
                                 [gameState.levelIndex]: maxStars
-                            }
+                            },
+                            // Add earned stars to the running total
+                            totalStarsEarned: (gameState.totalStarsEarned || 0) + earnedThisRound,
                         }
                     });
                 }
@@ -565,6 +570,7 @@ export const useGameStore = create<GameStore>()(
                         spent: 0,
                         levelIndex: index,
                         levelStars: get().gameState?.levelStars || {},
+                        totalStarsEarned: get().gameState?.totalStarsEarned || 0,
                         budgetExceeded: false,
                     },
                 });
@@ -590,20 +596,17 @@ export const useGameStore = create<GameStore>()(
                 }));
             },
 
-            doubleStars: () => {
+            doubleStars: (earnedStars) => {
                 const { gameState } = get();
                 const levelIndex = gameState.levelIndex;
-                const currentStars = gameState.levelStars[levelIndex] || 0;
-                const doubled = Math.min(currentStars * 2, 3);
+                // Add earnedStars again to the running total (stars as currency)
                 set((state) => ({
                     gameState: {
                         ...state.gameState,
-                        levelStars: {
-                            ...state.gameState.levelStars,
-                            [levelIndex]: doubled
-                        }
+                        totalStarsEarned: (state.gameState.totalStarsEarned || 0) + earnedStars,
                     }
                 }));
+                console.log(`[doubleStars] +${earnedStars} bonus stars → total: ${(gameState.totalStarsEarned || 0) + earnedStars} (level ${levelIndex})`);
             },
         }), {
         name: 'bridge-game-storage',

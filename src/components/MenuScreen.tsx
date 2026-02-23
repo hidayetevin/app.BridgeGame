@@ -8,7 +8,7 @@ const MenuScreen: React.FC = () => {
     const t = translations[gameState.language];
     const currentLevel = LEVELS[gameState.levelIndex];
 
-    const totalStars = Object.values(gameState.levelStars || {}).reduce((sum, stars) => sum + stars, 0);
+    const totalStars = gameState.totalStarsEarned || 0;
 
     return (
         <div style={{
@@ -68,6 +68,17 @@ const MenuScreen: React.FC = () => {
                     backdropFilter: 'blur(4px)'
                 }}>
                     {t.level} {gameState.levelIndex + 1}: {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
+                    {' '}
+                    {Array.from({ length: 3 }).map((_, i) => {
+                        const stars = gameState.levelStars[gameState.levelIndex] || 0;
+                        return (
+                            <span key={i} style={{
+                                opacity: i < stars ? 1 : 0.3,
+                                filter: i < stars ? 'none' : 'grayscale(1)',
+                                fontSize: '0.9em'
+                            }}>⭐</span>
+                        );
+                    })}
                 </div>
 
                 <button

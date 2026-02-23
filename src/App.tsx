@@ -279,7 +279,7 @@ function App() {
                                             const success = await AdManager.showRewarded();
                                             if (success) {
                                                 AdManager.markRewardedWatched();
-                                                doubleStars();
+                                                doubleStars(currentStars); // pass current earned stars directly
                                                 setDoubleUsed(true);
                                                 setShowWinActions(true);
                                             }
