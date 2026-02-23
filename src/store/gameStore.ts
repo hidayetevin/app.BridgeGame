@@ -83,6 +83,8 @@ interface GameStore {
     setLost: (lost: boolean) => void;
     loadLevel: (index: number) => void;
     resetLevel: () => void;
+    addBudget: (amount: number) => void;
+    clearBudgetExceeded: () => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -100,6 +102,7 @@ export const useGameStore = create<GameStore>()(
                 spent: 0,
                 levelIndex: 0,
                 levelStars: {},
+                budgetExceeded: false,
             },
             selectedNodeId: null,
             isDrawingBeam: false,
@@ -162,6 +165,7 @@ export const useGameStore = create<GameStore>()(
                 const cost = length * MATERIALS[material].cost;
 
                 if (state.gameState.spent + cost > state.gameState.budget) {
+                    set((s) => ({ gameState: { ...s.gameState, budgetExceeded: true } }));
                     console.warn('Budget exceeded!');
                     return;
                 }
@@ -265,13 +269,13 @@ export const useGameStore = create<GameStore>()(
                         const totalCost = dist * MATERIALS[selectedMaterial].cost;
 
                         if (gameState.spent + totalCost > gameState.budget) {
-                            console.warn('Budget exceeded!');
-                            // Cancel drawing
-                            set({
+                            set((s) => ({
+                                gameState: { ...s.gameState, budgetExceeded: true },
                                 selectedNodeId: null,
                                 isDrawingBeam: false,
                                 ghostBeamEnd: null,
-                            });
+                            }));
+                            console.warn('Budget exceeded!');
                             return;
                         }
 
@@ -423,15 +427,24 @@ export const useGameStore = create<GameStore>()(
                         }
                     });
                 } else if (lastAction.type === 'remove_beam') {
-                    // Undo remove: add the beams back (nodes are never removed completely on beam clear unless isolated, but we didn't wipe nodes)
+                    // Undo remove: add the beams back
                     set(state => ({
                         beams: [...state.beams, ...lastAction.removedBeams],
                         gameState: {
                             ...state.gameState,
-                            spent: state.gameState.spent - lastAction.costChange // costChange for removed is negative, subtracting it adds to cost
+                            spent: state.gameState.spent - lastAction.costChange
                         }
                     }));
                 }
+            },
+
+            clearBudgetExceeded: () => {
+                set((state) => ({
+                    gameState: {
+                        ...state.gameState,
+                        budgetExceeded: false
+                    }
+                }));
             },
 
             // Physics Actions
@@ -456,7 +469,6 @@ export const useGameStore = create<GameStore>()(
             decrementTime: () => {
                 const { timeLeft, hasWon, hasLost } = get();
 
-                // If already over, stop
                 if (hasWon || hasLost) {
                     set({ isTimerRunning: false });
                     return;
@@ -466,7 +478,6 @@ export const useGameStore = create<GameStore>()(
                     const newTime = timeLeft - 1;
                     set({ timeLeft: newTime });
 
-                    // Check immediately if time is up
                     if (newTime === 0) {
                         set({ hasLost: true, isTimerRunning: false });
                     }
@@ -479,7 +490,6 @@ export const useGameStore = create<GameStore>()(
             setLanguage: (language) => set((state) => ({ gameState: { ...state.gameState, language } })),
             setMode: (mode) => {
                 set((state) => {
-                    // Find current level time limit
                     const currentLevel = LEVELS[state.gameState.levelIndex];
                     const timeLimit = currentLevel?.timeLimit || 30;
 
@@ -489,7 +499,6 @@ export const useGameStore = create<GameStore>()(
                         brokenBeamIds: mode === 'editor' ? new Set() : state.brokenBeamIds,
                         hasWon: false,
                         hasLost: false,
-                        // Timer Logic: Start on simulation, stop on editor
                         timeLeft: mode === 'simulation' ? timeLimit : 0,
                         isTimerRunning: mode === 'simulation',
                     };
@@ -541,7 +550,7 @@ export const useGameStore = create<GameStore>()(
                     selectedNodeId: null,
                     isDrawingBeam: false,
                     ghostBeamEnd: null,
-                    physicsBodies: new Map(), // Updated property name
+                    physicsBodies: new Map(),
                     brokenBeamIds: new Set(),
                     hasWon: false,
                     hasLost: false,
@@ -555,10 +564,10 @@ export const useGameStore = create<GameStore>()(
                         spent: 0,
                         levelIndex: index,
                         levelStars: get().gameState?.levelStars || {},
+                        budgetExceeded: false,
                     },
                 });
 
-                // Add anchor nodes from level data
                 const { addNode } = get();
                 level.anchors.forEach((anchor) => {
                     addNode(anchor.x, anchor.y, 'anchor');
@@ -566,16 +575,28 @@ export const useGameStore = create<GameStore>()(
             },
 
             resetLevel: () => {
-                const currentLevel = get().gameState.levelIndex;
-                get().loadLevel(currentLevel);
+                const state = get();
+                state.loadLevel(state.gameState.levelIndex);
+            },
+
+            addBudget: (amount) => {
+                set((state) => ({
+                    gameState: {
+                        ...state.gameState,
+                        budget: state.gameState.budget + amount,
+                        budgetExceeded: false
+                    }
+                }));
             },
         }), {
         name: 'bridge-game-storage',
         partialize: (state) => ({
             gameState: {
                 ...state.gameState,
-                screen: 'menu', // Always start at menu
+                screen: 'menu',
                 mode: 'editor',
             }
         })
-    }));
+    }
+    )
+);

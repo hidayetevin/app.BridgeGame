@@ -42,7 +42,10 @@ export const translations = {
         restart: 'Restart',
         main_menu: 'Main Menu',
         undo: 'Undo',
-        total_stars: 'Total Stars'
+        total_stars: 'Total Stars',
+        out_of_budget: 'Out of Budget',
+        watch_ad_50: 'Watch Ad (+$50)',
+        cancel: 'Cancel'
     },
     tr: {
         title: 'Köprü İnşası',
@@ -85,6 +88,9 @@ export const translations = {
         restart: 'Yeniden Başla',
         main_menu: 'Ana Menü',
         undo: 'Geri Al',
-        total_stars: 'Toplam Yıldız'
+        total_stars: 'Toplam Yıldız',
+        out_of_budget: 'Bütçe Yetersiz',
+        watch_ad_50: 'Reklam İzle (+$50)',
+        cancel: 'İptal'
     }
 };

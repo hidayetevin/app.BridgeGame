@@ -10,7 +10,7 @@ import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
 function App() {
-    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history } = useGameStore();
+    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
     const t = translations[gameState.language];
     const [isPaused, setIsPaused] = useState(false);
@@ -326,6 +326,70 @@ function App() {
                             >
                                 🔄 {t.try_again}
                             </button>
+                        </div>
+                    )}
+
+                    {/* Budget Modal */}
+                    {gameState.budgetExceeded && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            background: 'rgba(56, 189, 248, 0.95)', // Blue theme
+                            padding: 'clamp(20px, 4vh, 40px)',
+                            borderRadius: '16px',
+                            textAlign: 'center',
+                            color: 'white',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                            zIndex: 110
+                        }}>
+                            <div style={{ fontSize: 'clamp(48px, 10vh, 64px)', marginBottom: 'max(8px, 2vh)' }}>💰</div>
+                            <div style={{ fontSize: 'clamp(20px, 4vh, 32px)', fontWeight: 'bold', marginBottom: 'max(4px, 1vh)' }}>
+                                {t.out_of_budget}
+                            </div>
+                            <div style={{ fontSize: 'clamp(14px, 3vh, 18px)', marginBottom: 'max(16px, 3vh)', opacity: 0.9 }}>
+                                ${gameState.spent.toFixed(2)} / ${gameState.budget.toFixed(2)}
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                <button
+                                    onClick={async () => {
+                                        const success = await AdManager.showRewarded();
+                                        if (success) {
+                                            addBudget(50);
+                                            clearBudgetExceeded();
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'white',
+                                        color: '#0284c7',
+                                        padding: 'clamp(8px, 1.5vh, 12px) clamp(16px, 3.5vh, 24px)',
+                                        borderRadius: '8px',
+                                        fontWeight: 'bold',
+                                        fontSize: 'clamp(14px, 3vh, 18px)',
+                                        border: 'none',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    📺 {t.watch_ad_50}
+                                </button>
+                                <button
+                                    onClick={() => clearBudgetExceeded()}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.2)',
+                                        color: 'white',
+                                        padding: 'clamp(8px, 1.5vh, 12px) clamp(16px, 3.5vh, 24px)',
+                                        borderRadius: '8px',
+                                        fontWeight: 'bold',
+                                        fontSize: 'clamp(14px, 3vh, 18px)',
+                                        border: '2px solid white',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    ✖️ {t.cancel}
+                                </button>
+                            </div>
                         </div>
                     )}
 
