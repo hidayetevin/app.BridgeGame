@@ -24,11 +24,11 @@ export const LEVELS: LevelData[] = [
             { x: 4.5, y: -2 },
         ],
         vehicleStart: { x: -12, y: -1 },
-        vehicleTarget: 10,
+        vehicleTarget: 6,       // just past the right anchor (4.5) — bridge cleared ✓
         waterLevel: -6,
         gap: 9,
-        platformLeftX: -14.5,   // -4.5 (edge) - 10 (half width)
-        platformRightX: 14.5,   // 4.5 (edge) + 10 (half width)
+        platformLeftX: -14.5,
+        platformRightX: 14.5,
         platformY: -2,
         platformWidth: 20,
         timeLimit: 10
@@ -42,7 +42,7 @@ export const LEVELS: LevelData[] = [
             { x: 7, y: 0 },
         ],
         vehicleStart: { x: -14, y: 1 },
-        vehicleTarget: 12,
+        vehicleTarget: 9,       // just past right anchor (7)
         waterLevel: -6,
         gap: 14,
         platformLeftX: -17,
@@ -60,7 +60,7 @@ export const LEVELS: LevelData[] = [
             { x: 9, y: 2 },
         ],
         vehicleStart: { x: -16, y: 3 },
-        vehicleTarget: 14,
+        vehicleTarget: 11,      // just past right anchor (9)
         waterLevel: -8,
         gap: 18,
         platformLeftX: -19,
@@ -70,3 +70,4 @@ export const LEVELS: LevelData[] = [
         timeLimit: 10
     },
 ];
+

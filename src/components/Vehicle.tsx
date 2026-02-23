@@ -10,17 +10,10 @@ import { LEVELS } from '../data/levels';
 const CAR_PATH = '/models/GLB format/sedan-sports.glb';
 const WHEEL_PATH = '/models/GLB format/wheel-default.glb';
 
-// ─── GLB components (used as children of physics meshes) ─────────────────────
-// Because they are CHILDREN of the cannon-managed mesh, they inherit position
-// and rotation for free — no useFrame sync needed.
-
+// ─── GLB car body — child of physics chassis mesh ─────────────────────────────
 function CarBodyGLB() {
     const { scene } = useGLTF(CAR_PATH);
     const cloned = useMemo(() => scene.clone(true), [scene]);
-    // Kenney sedan is ~1 unit long in its local X axis
-    // Physics chassis is 1.6 wide in world X
-    // Rotate so car faces +X direction (right)
-    // position Y -0.25 puts bottom of car flush with chassis bottom
     return (
         <primitive
             object={cloned}
@@ -31,74 +24,12 @@ function CarBodyGLB() {
     );
 }
 
-function WheelGLB({ flip }: { flip?: boolean }) {
-    const { scene } = useGLTF(WHEEL_PATH);
-    const cloned = useMemo(() => scene.clone(true), [scene]);
-    return (
-        <primitive
-            object={cloned}
-            scale={0.9}
-            rotation={[0, flip ? Math.PI : 0, 0]}
-        />
-    );
-}
-
-// ─── Position tracker for game logic ─────────────────────────────────────────
-// Reads cannon body position from the mesh ref every frame
-function PositionTracker({
-    chassisRef,
-    posX,
-    posY,
-    level,
-    hasWon,
-    hasFallen,
-    setWon,
-    setLost,
-    wheel1Api,
-    wheel2Api,
-    gameMode,
-}: {
-    chassisRef: React.RefObject<Mesh>;
-    posX: React.MutableRefObject<number>;
-    posY: React.MutableRefObject<number>;
-    level: any;
-    hasWon: React.MutableRefObject<boolean>;
-    hasFallen: React.MutableRefObject<boolean>;
-    setWon: (w: boolean) => void;
-    setLost: (l: boolean) => void;
-    wheel1Api: any;
-    wheel2Api: any;
-    gameMode: string;
-}) {
-    useFrame(() => {
-        if (gameMode !== 'simulation' || !chassisRef.current) return;
-
-        posX.current = chassisRef.current.position.x;
-        posY.current = chassisRef.current.position.y;
-
-        if (posX.current >= level.vehicleTarget && !hasWon.current) {
-            hasWon.current = true;
-            setWon(true);
-        }
-
-        if (posY.current < level.waterLevel && !hasFallen.current && !hasWon.current) {
-            hasFallen.current = true;
-            setLost(true);
-        }
-
-        if (!hasWon.current && !hasFallen.current && posX.current < level.vehicleTarget) {
-            wheel1Api.angularVelocity.set(0, 0, -20);
-            wheel2Api.angularVelocity.set(0, 0, -20);
-        }
-    });
-    return null;
-}
-
 // ─── Main Vehicle ─────────────────────────────────────────────────────────────
 export default function Vehicle() {
     const { gameState, setWon, setLost } = useGameStore();
     const level = LEVELS[gameState.levelIndex];
 
+    // Track cannon physics position via subscribe (same as original approach)
     const posX = useRef(level.vehicleStart.x);
     const posY = useRef(level.vehicleStart.y);
     const hasWon = useRef(false);
@@ -150,7 +81,39 @@ export default function Vehicle() {
         axisB: [0, 0, 1],
     });
 
-    // 5. Reset on editor mode
+    // 5. Subscribe to cannon position — original approach, reliable
+    useEffect(() => {
+        const unsub = chassisApi.position.subscribe((p) => {
+            posX.current = p[0];
+            posY.current = p[1];
+        });
+        return unsub;
+    }, [chassisApi]);
+
+    // 6. Game logic & drive — runs every frame
+    useFrame(() => {
+        if (gameState.mode !== 'simulation') return;
+
+        // Win check
+        if (posX.current >= level.vehicleTarget && !hasWon.current) {
+            hasWon.current = true;
+            setWon(true);
+        }
+
+        // Fall check
+        if (posY.current < level.waterLevel && !hasFallen.current && !hasWon.current) {
+            hasFallen.current = true;
+            setLost(true);
+        }
+
+        // Drive
+        if (!hasWon.current && !hasFallen.current) {
+            wheel1Api.angularVelocity.set(0, 0, -20);
+            wheel2Api.angularVelocity.set(0, 0, -20);
+        }
+    });
+
+    // 7. Reset when switching back to editor
     useEffect(() => {
         if (gameState.mode === 'editor') {
             chassisApi.position.set(level.vehicleStart.x, level.vehicleStart.y, 0);
@@ -173,28 +136,12 @@ export default function Vehicle() {
 
     return (
         <group>
-            {/* Game logic tracker — reads chassis position each frame */}
-            <PositionTracker
-                chassisRef={chassisRef}
-                posX={posX}
-                posY={posY}
-                level={level}
-                hasWon={hasWon}
-                hasFallen={hasFallen}
-                setWon={setWon}
-                setLost={setLost}
-                wheel1Api={wheel1Api}
-                wheel2Api={wheel2Api}
-                gameMode={gameState.mode}
-            />
-
-            {/* ── Chassis mesh (cannon-tracked) + car GLB as child ── */}
+            {/* ── Chassis: cannon physics mesh + car GLB as child ── */}
             <mesh ref={chassisRef} castShadow>
                 <boxGeometry args={[1.6, 0.5, 0.8]} />
                 <meshStandardMaterial visible={false} />
 
                 <Suspense fallback={
-                    /* Fallback box car while GLB loads */
                     <group>
                         <mesh position={[0, 0.1, 0]}>
                             <boxGeometry args={[1.5, 0.38, 0.8]} />
@@ -210,13 +157,12 @@ export default function Vehicle() {
                 </Suspense>
             </mesh>
 
-            {/* ── Rear wheel: physics only, invisible (car GLB has built-in wheels) ── */}
+            {/* ── Wheels: physics only, invisible (car GLB has its own wheels) ── */}
             <mesh ref={wheel1Ref} visible={false}>
                 <sphereGeometry args={[0.45, 8, 8]} />
                 <meshStandardMaterial />
             </mesh>
 
-            {/* ── Front wheel: physics only, invisible ── */}
             <mesh ref={wheel2Ref} visible={false}>
                 <sphereGeometry args={[0.45, 8, 8]} />
                 <meshStandardMaterial />
@@ -225,6 +171,6 @@ export default function Vehicle() {
     );
 }
 
-// Preload both models immediately
+// Preload model on module load (before component mounts)
 useGLTF.preload(CAR_PATH);
 useGLTF.preload(WHEEL_PATH);
