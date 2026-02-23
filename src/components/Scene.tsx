@@ -1,6 +1,5 @@
 import { Canvas } from '@react-three/fiber';
 import Camera from './Camera';
-import Grid from './Grid';
 import Cursor from './Cursor';
 import NodeComponent from './NodeComponent';
 import BeamComponent from './BeamComponent';
@@ -35,8 +34,15 @@ export default function Scene() {
             <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
             <hemisphereLight intensity={1.0} groundColor="#444444" />
 
-            {/* Grid for reference */}
-            <Grid />
+            {/* Environment: Sky and Water */}
+            <color attach="background" args={['#87ceeb']} /> {/* Sky Blue */}
+            {level && (
+                <mesh position={[0, level.waterLevel - 18, -2]} frustumCulled={false}>
+                    <boxGeometry args={[200, 40, 5]} />
+                    {/* Ocean water below the line */}
+                    <meshBasicMaterial color="#0ea5e9" transparent opacity={0.7} />
+                </mesh>
+            )}
 
             {/* Editor/Visual Ground (Non-Physics) */}
             {!isSimulating && level && (
@@ -50,12 +56,6 @@ export default function Scene() {
                     <group position={[level.platformRightX, level.platformY - 2.5, 0]}>
                         <GroundVisual width={level.platformWidth} height={5} />
                     </group>
-
-                    {/* Water level indicator */}
-                    <mesh position={[0, level.waterLevel, -0.5]}>
-                        <planeGeometry args={[100, 1]} />
-                        <meshBasicMaterial color="#2196F3" transparent opacity={0.3} />
-                    </mesh>
                 </>
             )}
 

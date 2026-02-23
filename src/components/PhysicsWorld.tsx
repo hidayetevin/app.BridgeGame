@@ -65,12 +65,6 @@ export default function PhysicsWorld() {
                     height={5}
                 />
             </Physics>
-
-            {/* Water level indicator */}
-            <mesh position={[0, level.waterLevel, -0.5]}>
-                <planeGeometry args={[100, 1]} />
-                <meshBasicMaterial color="#2196F3" transparent opacity={0.3} />
-            </mesh>
         </>
     );
 }
