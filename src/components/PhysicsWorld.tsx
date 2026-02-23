@@ -17,7 +17,7 @@ export default function PhysicsWorld() {
         <>
             <Physics
                 gravity={[0, -20, 0]}
-                iterations={60} // Increased for stiffer constraints (less stretching)
+                iterations={30} // Reduced from 60 — 30 still gives stiff-enough constraints with 2× less CPU
                 stepSize={1 / 60}
                 defaultContactMaterial={{
                     friction: 0.8,

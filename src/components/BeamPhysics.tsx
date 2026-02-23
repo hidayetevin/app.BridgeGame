@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useBox, usePointToPointConstraint } from '@react-three/cannon';
 import { useGameStore } from '../store/gameStore';
 import { MATERIALS } from '../utils/materials';
@@ -28,7 +28,9 @@ const IntactBeam = ({
 }: BeamPhysicsProps & { startBodyData: any, endBodyData: any }) => {
     const { breakBeam } = useGameStore();
     const gl = useThree((state) => state.gl);
-    const [, setCurrentForce] = useState(0); // Kept for logic, but not used for color anymore
+    // useRef instead of useState — force value never needs to trigger a re-render.
+    // With useState: every beam caused ~10 React re-renders/sec = 200/sec for 20 beams.
+    const forceRef = useRef(0);
 
     // Calculate Geometry
     const startNode = useGameStore((s) => s.getNodeById(startNodeId));
@@ -120,12 +122,13 @@ const IntactBeam = ({
                 const strain = Math.abs(dist - length);
                 const force = strain * materialProps.stiffness;
 
-                setCurrentForce(force);
+                // Store in ref — no re-render needed, only used for break check
+                forceRef.current = force;
 
                 if (force > materialProps.strength) {
                     breakBeam(id);
                 }
-            }, 100);
+            }, 150); // 150ms instead of 100ms — beam can't break visually faster than 6fps anyway
         }, 1000);
 
         return () => {

@@ -15,9 +15,15 @@ export default function Scene() {
     const isSimulating = gameState.mode === 'simulation';
     const level = LEVELS[gameState.levelIndex];
 
+    // In game screen (editor + simulation): render every frame.
+    // In menu/settings/shop: demand-only — the 3D background is static,
+    // no need to burn GPU at 60fps when nothing moves.
+    const frameloop = gameState.screen === 'game' ? 'always' : 'demand';
+
     return (
         <Canvas
-            dpr={[1, 2]}
+            dpr={[1, 1.5]}
+            frameloop={frameloop}
             style={{ width: '100%', height: '100%' }}
         >
             {/* Camera Setup */}
