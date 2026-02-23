@@ -276,10 +276,12 @@ function App() {
                                         onClick={async () => {
                                             const success = await AdManager.showRewarded();
                                             if (success) {
+                                                AdManager.markRewardedWatched(); // skip next interstitial
                                                 doubleStars();
                                                 setDoubleUsed(true);
                                                 setShowWinActions(true);
                                             }
+                                            // If !success: dismissed early — do nothing, stay on modal
                                         }}
                                         style={{
                                             background: 'linear-gradient(135deg, #FFD700, #FF8C00)',
@@ -428,9 +430,11 @@ function App() {
                                     onClick={async () => {
                                         const success = await AdManager.showRewarded();
                                         if (success) {
+                                            AdManager.markRewardedWatched(); // skip next interstitial
                                             addBudget(50);
                                             clearBudgetExceeded();
                                         }
+                                        // If !success: dismissed early — modal stays open, user can try again or cancel
                                     }}
                                     style={{
                                         background: 'white',
