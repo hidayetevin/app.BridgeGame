@@ -26,7 +26,7 @@ function CarBodyGLB() {
             object={cloned}
             scale={0.7}
             rotation={[0, Math.PI / 2, 0]}
-            position={[0, -0.25, 0]}
+            position={[0, -0.50, 0]}
         />
     );
 }
@@ -210,22 +210,16 @@ export default function Vehicle() {
                 </Suspense>
             </mesh>
 
-            {/* ── Rear wheel + GLB wheel as child ── */}
-            <mesh ref={wheel1Ref} castShadow>
+            {/* ── Rear wheel: physics only, invisible (car GLB has built-in wheels) ── */}
+            <mesh ref={wheel1Ref} visible={false}>
                 <sphereGeometry args={[0.45, 8, 8]} />
-                <meshStandardMaterial visible={false} />
-                <Suspense fallback={null}>
-                    <WheelGLB />
-                </Suspense>
+                <meshStandardMaterial />
             </mesh>
 
-            {/* ── Front wheel ── */}
-            <mesh ref={wheel2Ref} castShadow>
+            {/* ── Front wheel: physics only, invisible ── */}
+            <mesh ref={wheel2Ref} visible={false}>
                 <sphereGeometry args={[0.45, 8, 8]} />
-                <meshStandardMaterial visible={false} />
-                <Suspense fallback={null}>
-                    <WheelGLB flip />
-                </Suspense>
+                <meshStandardMaterial />
             </mesh>
         </group>
     );
