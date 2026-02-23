@@ -1,8 +1,9 @@
-import { useState, Suspense, useMemo } from 'react';
+import { useState, Suspense, useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
 import { useGameStore } from '../store/gameStore';
 import { CARS, CarData } from '../data/cars';
+import { AdManager } from '../utils/AdManager';
 
 // ─── 3D preview of a single car ───────────────────────────────────────────────
 function CarPreview3D({ car }: { car: CarData }) {
@@ -22,6 +23,12 @@ function CarPreview3D({ car }: { car: CarData }) {
 export default function CarShop() {
     const { gameState, setScreen, buyCar, equipCar } = useGameStore() as any;
     const isTr = gameState.language === 'tr';
+
+    // Hide banner while in shop, restore on exit
+    useEffect(() => {
+        AdManager.hideBanner();
+        return () => { AdManager.showBanner(); };
+    }, []);
 
     const [selectedId, setSelectedId] = useState<string>(
         gameState.equippedCar || 'sedan-sports'
