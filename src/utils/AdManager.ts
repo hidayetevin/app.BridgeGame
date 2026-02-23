@@ -17,9 +17,62 @@ export const AdConfig = {
     native: 'ca-app-pub-4190858087915294/1479543408',
 };
 
-// If the player just watched a rewarded ad, skip the next interstitial so they
-// aren't bombarded with two ads back-to-back.
+// --- Internal state ---
+
+/** If a rewarded ad was just watched, skip the very next interstitial. */
 let skipNextInterstitial = false;
+
+/** Tracks whether interstitial is currently loaded and ready to show. */
+let interstitialReady = false;
+
+/** Tracks whether rewarded ad is currently loaded and ready to show. */
+let rewardedReady = false;
+
+/** Prevents parallel preload calls for the same ad type. */
+let interstitialLoading = false;
+let rewardedLoading = false;
+
+// --- Preloaders ---
+
+/** Silently preloads an interstitial ad in the background. */
+async function preloadInterstitial() {
+    if (!Capacitor.isNativePlatform()) return;
+    if (interstitialReady || interstitialLoading) return;
+    interstitialLoading = true;
+    try {
+        await AdMob.prepareInterstitial({
+            adId: AdConfig.interstitial,
+            isTesting: false,
+        });
+        interstitialReady = true;
+        console.log('[AdManager] Interstitial preloaded ✓');
+    } catch (e) {
+        console.log('[AdManager] Interstitial preload failed', e);
+    } finally {
+        interstitialLoading = false;
+    }
+}
+
+/** Silently preloads a rewarded ad in the background. */
+async function preloadRewarded() {
+    if (!Capacitor.isNativePlatform()) return;
+    if (rewardedReady || rewardedLoading) return;
+    rewardedLoading = true;
+    try {
+        await AdMob.prepareRewardVideoAd({
+            adId: AdConfig.rewarded,
+            isTesting: false,
+        });
+        rewardedReady = true;
+        console.log('[AdManager] Rewarded preloaded ✓');
+    } catch (e) {
+        console.log('[AdManager] Rewarded preload failed', e);
+    } finally {
+        rewardedLoading = false;
+    }
+}
+
+// --- Public API ---
 
 export class AdManager {
 
@@ -28,6 +81,10 @@ export class AdManager {
         skipNextInterstitial = true;
     }
 
+    /**
+     * Initialises AdMob and immediately starts preloading both ad types
+     * so they are ready the moment the player needs them.
+     */
     static async init() {
         if (!Capacitor.isNativePlatform()) return;
         try {
@@ -36,9 +93,13 @@ export class AdManager {
                 initializeForTesting: false,
             };
             await AdMob.initialize(options);
-            console.log('AdMob initialized');
+            console.log('[AdManager] Initialized');
+
+            // Kick off background preloads immediately — don't await, run in parallel
+            preloadInterstitial();
+            preloadRewarded();
         } catch (error) {
-            console.error('AdMob initialization failed', error);
+            console.error('[AdManager] Initialization failed', error);
         }
     }
 
@@ -54,7 +115,7 @@ export class AdManager {
             };
             await AdMob.showBanner(options);
         } catch (error) {
-            console.log('Failed to show banner', error);
+            console.log('[AdManager] Failed to show banner', error);
         }
     }
 
@@ -67,33 +128,32 @@ export class AdManager {
         }
     }
 
+    /** @deprecated Use init() — preloading is now automatic. */
     static async prepareInterstitial(): Promise<void> {
-        if (!Capacitor.isNativePlatform()) return;
-        try {
-            await AdMob.prepareInterstitial({
-                adId: AdConfig.interstitial,
-                isTesting: false,
-            });
-        } catch (error) {
-            console.log('Failed to prepare interstitial', error);
-        }
+        await preloadInterstitial();
     }
 
     /**
      * Shows an interstitial ad.
-     * - If a rewarded ad was just watched, skips the interstitial.
-     * - If the ad fails to load or show, resolves immediately (game never freezes).
-     * - Has a 5-second hard timeout as last resort safety net.
+     * - Uses the preloaded ad immediately if available (near-instant display).
+     * - Skips if a rewarded ad was just watched.
+     * - Resolves after dismiss or on any failure (game never freezes).
+     * - Hard timeout: 5 seconds.
      */
     static async showInterstitial(): Promise<void> {
-        // Skip if player just watched a rewarded ad
         if (skipNextInterstitial) {
             skipNextInterstitial = false;
-            console.log('Interstitial skipped (rewarded ad was just watched)');
+            console.log('[AdManager] Interstitial skipped (post-rewarded)');
             return;
         }
 
         if (!Capacitor.isNativePlatform()) return;
+
+        // If not preloaded yet, try a fast load now
+        if (!interstitialReady) {
+            console.log('[AdManager] Interstitial not preloaded, loading now...');
+            await preloadInterstitial();
+        }
 
         return new Promise(async (resolve) => {
             let resolved = false;
@@ -101,15 +161,16 @@ export class AdManager {
                 if (!resolved) {
                     resolved = true;
                     resolve();
+                    // Immediately preload next one in background
+                    interstitialReady = false;
+                    preloadInterstitial();
                 }
             };
 
-            // Hard timeout: 5 seconds max — game will never freeze waiting for an ad
+            // Hard 5-second safety net
             const timeout = setTimeout(done, 5000);
 
             try {
-                await this.prepareInterstitial();
-
                 const dismissListener = await AdMob.addListener(
                     InterstitialAdPluginEvents.Dismissed,
                     () => {
@@ -119,7 +180,6 @@ export class AdManager {
                     }
                 );
 
-                // Also handle failed-to-show events
                 const failListener = await AdMob.addListener(
                     InterstitialAdPluginEvents.FailedToLoad,
                     () => {
@@ -129,9 +189,10 @@ export class AdManager {
                     }
                 );
 
+                interstitialReady = false; // consumed
                 await AdMob.showInterstitial();
             } catch (error) {
-                console.log('Failed to show interstitial', error);
+                console.log('[AdManager] Failed to show interstitial', error);
                 clearTimeout(timeout);
                 done();
             }
@@ -140,14 +201,19 @@ export class AdManager {
 
     /**
      * Shows a rewarded ad.
-     * - Returns `true` only if the player watched the ad to completion.
-     * - Returns `false` if the ad is dismissed early or fails to load/show.
-     * - Has a 30-second hard timeout as last resort safety net.
-     * - On web, returns `true` for easy testing.
+     * - Uses the preloaded ad immediately if available.
+     * - Returns `true` only if the player watched to completion and earned the reward.
+     * - Returns `false` if dismissed early or if ad failed — no penalty, game continues.
+     * - Hard timeout: 30 seconds.
      */
     static async showRewarded(): Promise<boolean> {
-        // On web, simulate a successful reward for testing
-        if (!Capacitor.isNativePlatform()) return Promise.resolve(true);
+        if (!Capacitor.isNativePlatform()) return true; // web: always reward for dev testing
+
+        // If not preloaded yet, try a fast load now
+        if (!rewardedReady) {
+            console.log('[AdManager] Rewarded not preloaded, loading now...');
+            await preloadRewarded();
+        }
 
         return new Promise(async (resolve) => {
             let resolved = false;
@@ -155,22 +221,20 @@ export class AdManager {
                 if (!resolved) {
                     resolved = true;
                     resolve(result);
+                    // Immediately preload the next one in background
+                    rewardedReady = false;
+                    preloadRewarded();
                 }
             };
 
-            // Hard timeout: 30 seconds — user can't be stuck forever
+            // Hard 30-second safety net
             const timeout = setTimeout(() => {
-                console.log('Rewarded ad timed out');
+                console.log('[AdManager] Rewarded ad timed out');
                 done(false);
             }, 30000);
 
             try {
                 let isRewarded = false;
-
-                await AdMob.prepareRewardVideoAd({
-                    adId: AdConfig.rewarded,
-                    isTesting: false,
-                });
 
                 const rewardListener = await AdMob.addListener(
                     RewardAdPluginEvents.Rewarded,
@@ -186,7 +250,7 @@ export class AdManager {
                         rewardListener.remove();
                         dismissListener.remove();
                         clearTimeout(timeout);
-                        done(isRewarded); // false if dismissed before reward
+                        done(isRewarded); // false if dismissed before reward event
                     }
                 );
 
@@ -199,9 +263,10 @@ export class AdManager {
                     }
                 );
 
+                rewardedReady = false; // consumed
                 await AdMob.showRewardVideoAd();
             } catch (error) {
-                console.log('Failed to show rewarded ad', error);
+                console.log('[AdManager] Failed to show rewarded ad', error);
                 clearTimeout(timeout);
                 done(false);
             }
