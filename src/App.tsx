@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Scene from './components/Scene';
 import MenuScreen from './components/MenuScreen';
 import SettingsScreen from './components/SettingsScreen';
+import CarShop from './components/CarShop';
 import { useGameStore } from './store/gameStore';
 import { LEVELS } from './data/levels';
 import { translations } from './data/translations';
@@ -74,6 +75,7 @@ function App() {
             {/* Fullscreen Overlays */}
             {gameState.screen === 'menu' && <MenuScreen />}
             {gameState.screen === 'settings' && <SettingsScreen />}
+            {gameState.screen === 'shop' && <CarShop />}
 
             {/* In-Game UI */}
             {gameState.screen === 'game' && (

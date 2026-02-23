@@ -86,6 +86,8 @@ interface GameStore {
     addBudget: (amount: number) => void;
     clearBudgetExceeded: () => void;
     doubleStars: (earnedStars: number) => void;
+    buyCar: (carId: string, price: number) => boolean; // returns true if purchase successful
+    equipCar: (carId: string) => void;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -105,6 +107,8 @@ export const useGameStore = create<GameStore>()(
                 levelStars: {},
                 totalStarsEarned: 0,
                 budgetExceeded: false,
+                equippedCar: 'sedan-sports',
+                ownedCars: ['sedan-sports'],
             },
             selectedNodeId: null,
             isDrawingBeam: false,
@@ -572,6 +576,8 @@ export const useGameStore = create<GameStore>()(
                         levelStars: get().gameState?.levelStars || {},
                         totalStarsEarned: get().gameState?.totalStarsEarned || 0,
                         budgetExceeded: false,
+                        equippedCar: get().gameState?.equippedCar || 'sedan-sports',
+                        ownedCars: get().gameState?.ownedCars || ['sedan-sports'],
                     },
                 });
 
@@ -607,6 +613,32 @@ export const useGameStore = create<GameStore>()(
                     }
                 }));
                 console.log(`[doubleStars] +${earnedStars} bonus stars → total: ${(gameState.totalStarsEarned || 0) + earnedStars} (level ${levelIndex})`);
+            },
+
+            buyCar: (carId, price) => {
+                const { gameState } = get();
+                const stars = gameState.totalStarsEarned || 0;
+                const owned = gameState.ownedCars || ['sedan-sports'];
+                if (owned.includes(carId)) return false; // already owned
+                if (stars < price) return false;         // not enough stars
+                set((state) => ({
+                    gameState: {
+                        ...state.gameState,
+                        totalStarsEarned: (state.gameState.totalStarsEarned || 0) - price,
+                        ownedCars: [...(state.gameState.ownedCars || ['sedan-sports']), carId],
+                        equippedCar: carId, // auto-equip after purchase
+                    }
+                }));
+                return true;
+            },
+
+            equipCar: (carId) => {
+                const { gameState } = get();
+                const owned = gameState.ownedCars || ['sedan-sports'];
+                if (!owned.includes(carId)) return;
+                set((state) => ({
+                    gameState: { ...state.gameState, equippedCar: carId }
+                }));
             },
         }), {
         name: 'bridge-game-storage',

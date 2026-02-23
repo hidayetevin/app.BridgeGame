@@ -108,6 +108,26 @@ const MenuScreen: React.FC = () => {
                 </button>
 
                 <button
+                    onClick={() => setScreen('shop' as any)}
+                    style={{
+                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        color: '#1a1a1a',
+                        padding: 'max(8px, 2vh) 24px',
+                        borderRadius: '12px',
+                        fontSize: 'clamp(16px, 3.5vh, 24px)',
+                        fontWeight: 'bold',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                        boxShadow: '0 4px 12px rgba(245,158,11,0.4)',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                >
+                    🏪 {gameState.language === 'tr' ? 'Market' : 'Shop'}
+                </button>
+
+                <button
                     onClick={() => setScreen('settings')}
                     style={{
                         background: 'rgba(255, 255, 255, 0.2)',

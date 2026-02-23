@@ -15,7 +15,7 @@ export interface Beam {
 }
 
 export interface GameState {
-    screen: 'menu' | 'game' | 'settings';
+    screen: 'menu' | 'game' | 'settings' | 'shop';
     language: 'en' | 'tr';
     mode: 'editor' | 'simulation';
     budget: number;
@@ -24,6 +24,8 @@ export interface GameState {
     levelStars: Record<number, number>;   // Per-level best score (1-3), for display
     totalStarsEarned: number;             // Accumulated star currency (can exceed 3× levels)
     budgetExceeded: boolean;
+    equippedCar: string;                  // ID of currently active car
+    ownedCars: string[];                  // IDs of purchased cars
 }
 
 export interface LevelData {

@@ -5,19 +5,20 @@ import { useGLTF } from '@react-three/drei';
 import { Mesh } from 'three';
 import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
+import { CARS } from '../data/cars';
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
-const CAR_PATH = '/models/GLB format/sedan-sports.glb';
-const WHEEL_PATH = '/models/GLB format/wheel-default.glb';
+const GLB_BASE = '/models/GLB format/';
+const DEFAULT_CAR = 'sedan-sports';
 
 // ─── GLB car body — child of physics chassis mesh ─────────────────────────────
-function CarBodyGLB() {
-    const { scene } = useGLTF(CAR_PATH);
-    const cloned = useMemo(() => scene.clone(true), [scene]);
+function CarBodyGLB({ glbPath, previewScale }: { glbPath: string; previewScale: number }) {
+    const { scene } = useGLTF(glbPath);
+    const cloned = useMemo(() => scene.clone(true), [scene, glbPath]);
     return (
         <primitive
             object={cloned}
-            scale={0.7}
+            scale={previewScale * 0.5}  // previewScale is 1.4 for sedan → 0.7 game scale
             rotation={[0, Math.PI / 2, 0]}
             position={[0, -0.50, 0]}
         />
@@ -28,6 +29,11 @@ function CarBodyGLB() {
 export default function Vehicle() {
     const { gameState, setWon, setLost } = useGameStore();
     const level = LEVELS[gameState.levelIndex];
+
+    // Resolve equipped car data for GLB path
+    const equippedId = gameState.equippedCar || DEFAULT_CAR;
+    const carData = CARS.find(c => c.id === equippedId) || CARS[0];
+    const carGlbPath = GLB_BASE + equippedId + '.glb';
 
     // Track cannon physics position via subscribe (same as original approach)
     const posX = useRef(level.vehicleStart.x);
@@ -147,13 +153,9 @@ export default function Vehicle() {
                             <boxGeometry args={[1.5, 0.38, 0.8]} />
                             <meshStandardMaterial color="#e53935" roughness={0.3} metalness={0.5} />
                         </mesh>
-                        <mesh position={[0.05, 0.38, 0]}>
-                            <boxGeometry args={[0.85, 0.28, 0.7]} />
-                            <meshStandardMaterial color="#b71c1c" roughness={0.3} />
-                        </mesh>
                     </group>
                 }>
-                    <CarBodyGLB />
+                    <CarBodyGLB glbPath={carGlbPath} previewScale={carData.previewScale} />
                 </Suspense>
             </mesh>
 
@@ -171,6 +173,5 @@ export default function Vehicle() {
     );
 }
 
-// Preload model on module load (before component mounts)
-useGLTF.preload(CAR_PATH);
-useGLTF.preload(WHEEL_PATH);
+// Preload all car models so they cache quickly in the background
+CARS.forEach(car => useGLTF.preload(car.glbPath));
