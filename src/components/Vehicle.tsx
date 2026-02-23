@@ -24,7 +24,7 @@ function CarBodyGLB() {
     return (
         <primitive
             object={cloned}
-            scale={1.4}
+            scale={0.7}
             rotation={[0, Math.PI / 2, 0]}
             position={[0, -0.25, 0]}
         />
