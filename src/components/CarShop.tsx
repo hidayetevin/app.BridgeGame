@@ -120,7 +120,7 @@ export default function CarShop() {
                     {/* 3D Canvas */}
                     <div style={{ flex: 1, minHeight: 0 }}>
                         <Canvas
-                            camera={{ position: [2.5, 1.5, 2.5], fov: 40 }}
+                            camera={{ position: [4, 2.5, 4], fov: 35 }}
                             style={{ background: 'transparent' }}
                         >
                             <ambientLight intensity={0.6} />
