@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import Scene from './components/Scene';
 import MenuScreen from './components/MenuScreen';
 import SettingsScreen from './components/SettingsScreen';
-import CarShop from './components/CarShop';
+// CarShop is lazily loaded — only downloaded when the user opens the market
+const CarShop = lazy(() => import('./components/CarShop'));
 import { useGameStore } from './store/gameStore';
 import { LEVELS } from './data/levels';
 import { translations } from './data/translations';
@@ -75,7 +76,22 @@ function App() {
             {/* Fullscreen Overlays */}
             {gameState.screen === 'menu' && <MenuScreen />}
             {gameState.screen === 'settings' && <SettingsScreen />}
-            {gameState.screen === 'shop' && <CarShop />}
+            {/* Lazy-loaded shop — Suspense prevents blank flash */}
+            {gameState.screen === 'shop' && (
+                <Suspense fallback={
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(160deg,#0f172a,#1e293b)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'white', fontSize: '18px', fontWeight: 'bold',
+                        zIndex: 1000,
+                    }}>
+                        🏪 Yükleniyor...
+                    </div>
+                }>
+                    <CarShop />
+                </Suspense>
+            )}
 
             {/* In-Game UI */}
             {gameState.screen === 'game' && (

@@ -35,6 +35,11 @@ export default function Vehicle() {
     const carData = CARS.find(c => c.id === equippedId) || CARS[0];
     const carGlbPath = GLB_BASE + equippedId + '.glb';
 
+    // Preload the equipped car ahead of simulation start
+    useEffect(() => {
+        useGLTF.preload(carGlbPath);
+    }, [carGlbPath]);
+
     // Track cannon physics position via subscribe (same as original approach)
     const posX = useRef(level.vehicleStart.x);
     const posY = useRef(level.vehicleStart.y);
@@ -173,5 +178,8 @@ export default function Vehicle() {
     );
 }
 
-// Preload all car models so they cache quickly in the background
-CARS.forEach(car => useGLTF.preload(car.glbPath));
+// Only preload the default (starter) car at module load time.
+// All other cars preload lazily: when equipped (Vehicle useEffect)
+// or when selected in CarShop.
+useGLTF.preload(GLB_BASE + DEFAULT_CAR + '.glb');
+

@@ -1,6 +1,6 @@
 import { useState, Suspense, useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
+import { useGLTF, OrbitControls } from '@react-three/drei';
 import { useGameStore } from '../store/gameStore';
 import { CARS, CarData } from '../data/cars';
 import { AdManager } from '../utils/AdManager';
@@ -36,6 +36,12 @@ export default function CarShop() {
     const [feedback, setFeedback] = useState<string | null>(null);
 
     const selected = CARS.find(c => c.id === selectedId) || CARS[0];
+
+    // Preload the selected car's GLB when selection changes
+    // so it's cached before the 3D canvas tries to render it
+    useEffect(() => {
+        useGLTF.preload(selected.glbPath);
+    }, [selected.glbPath]);
     const stars = gameState.totalStarsEarned || 0;
     const owned: string[] = gameState.ownedCars || ['sedan-sports'];
     const equipped: string = gameState.equippedCar || 'sedan-sports';
@@ -129,13 +135,16 @@ export default function CarShop() {
                         <Canvas
                             camera={{ position: [4, 2.5, 4], fov: 35 }}
                             style={{ background: 'transparent' }}
+                            gl={{ powerPreference: 'default', antialias: false }}
+                            dpr={1}
                         >
-                            <ambientLight intensity={0.6} />
-                            <directionalLight position={[5, 5, 5]} intensity={1.2} castShadow />
-                            <directionalLight position={[-3, 3, -3]} intensity={0.4} />
+                            {/* Warm multi-directional lighting replaces heavy Environment HDR */}
+                            <ambientLight intensity={0.9} />
+                            <directionalLight position={[5, 8, 5]} intensity={1.4} />
+                            <directionalLight position={[-4, 3, -4]} intensity={0.5} color="#b0c8ff" />
+                            <hemisphereLight intensity={0.6} groundColor="#334155" />
                             <Suspense fallback={null}>
                                 <CarPreview3D car={selected} />
-                                <Environment preset="city" />
                             </Suspense>
                             <OrbitControls
                                 enablePan={false}
