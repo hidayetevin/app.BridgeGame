@@ -32,9 +32,15 @@ const MenuScreen: React.FC = () => {
                 fontWeight: 'bold',
                 marginBottom: '2vh',
                 textShadow: '0 4px 16px rgba(0,0,0,0.5)',
-                textAlign: 'center'
             }}>
-                🌉 {t.title}
+                <img src="/images/app_icon.png" alt="App Icon" style={{
+                    width: 'clamp(48px, 12vh, 80px)',
+                    height: 'clamp(48px, 12vh, 80px)',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+                    marginRight: '12px'
+                }} />
+                {t.title}
             </h1>
 
             <div style={{
