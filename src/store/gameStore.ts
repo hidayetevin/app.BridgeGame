@@ -314,8 +314,11 @@ export const useGameStore = create<GameStore>()(
                             const newNodes: Node[] = [];
                             const newBeams: Beam[] = [];
 
-                            // Step by MAX_LEN until close to end
-                            while (currentDist + MAX_LEN < dist - 0.1) { // 0.1 tolerance
+                            // Step by MAX_LEN until close to end.
+                            // KURAL: Eğer kalan parça 1.5 x MAX_LEN (Yani 4.5 birim) altındaysa bölme!
+                            // Bu kural, sona ufak bir düğüm/parça atılıp rampalarda arabayı sarsmasını ("Tümsek" oluşumunu) önler.
+                            // Yol %50 oranında esnemeye izin verecek şekilde tek parça olarak bağlar.
+                            while (currentDist + (MAX_LEN * 1.5) < dist) {
                                 currentDist += MAX_LEN;
 
                                 const newX = startNode.x + dirX * currentDist;
