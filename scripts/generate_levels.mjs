@@ -65,9 +65,9 @@ createLevel('Isınma Rampası', 800,
 
 // 7. Sarp Boğaz
 createLevel('Sarp Boğaz', 1100,
-    [{ x: -7, y: -3 }, { x: -1, y: 2 }, { x: 7, y: 2 }],
+    [{ x: -7, y: -3 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: 7, y: 2 }],
     { x: -15, y: -2 }, 10, -8,
-    [{ x: -57, y: -3, width: 100 }, { x: -4, y: 2, width: 6 }, { x: 57, y: 2, width: 100 }]
+    [{ x: -57, y: -3, width: 100 }, { x: 0, y: 0, width: 2 }, { x: 57, y: 2, width: 100 }]
 );
 
 // 8. Bütçe Krizi
@@ -79,9 +79,9 @@ createLevel('Bütçe Krizi', 350,
 
 // 9. Merdivenler
 createLevel('Merdivenler', 1800,
-    [{ x: -12, y: -4 }, { x: -4, y: -1 }, { x: 4, y: 2 }, { x: 12, y: 5 }],
-    { x: -20, y: -3 }, 15, -8,
-    [{ x: -62, y: -4, width: 100 }, { x: -8, y: -1, width: 8 }, { x: 0, y: 2, width: 8 }, { x: 62, y: 5, width: 100 }]
+    [{ x: -15, y: -4 }, { x: -9, y: -1 }, { x: -7, y: -1 }, { x: -1, y: 2 }, { x: 1, y: 2 }, { x: 7, y: 5 }],
+    { x: -22, y: -3 }, 15, -8,
+    [{ x: -65, y: -4, width: 100 }, { x: -8, y: -1, width: 2 }, { x: 0, y: 2, width: 2 }, { x: 57, y: 5, width: 100 }]
 );
 
 // 10. Çelik İhtiyacı
