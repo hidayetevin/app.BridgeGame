@@ -177,10 +177,10 @@ function App() {
                     {/* Control Buttons */}
                     <div style={{
                         position: 'absolute',
-                        top: '16px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
+                        top: '80px', // Pause butonunun altındaki kırmızı kutulu alan
+                        left: '16px',
                         display: 'flex',
+                        flexDirection: 'column', // Alt alta dizersin menüde yer kaplamaz
                         gap: '12px',
                         zIndex: 100,
                         pointerEvents: 'auto'
@@ -506,10 +506,10 @@ function App() {
                         </div>
                     )}
 
-                    {/* Material Selector - Top Center (Below Play/Reset) */}
+                    {/* Material Selector - Top Center (Eski Başlat butonlarının yeri) */}
                     <div style={{
                         position: 'absolute',
-                        top: '64px', // Below play buttons (16px + ~40px height + gap)
+                        top: '16px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         color: 'white',
