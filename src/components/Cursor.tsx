@@ -34,20 +34,8 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
         raycaster.current.ray.intersectPlane(plane.current, intersection);
 
         if (intersection) {
-            let snappedX = snapToGrid(intersection.x);
-            let snappedY = snapToGrid(intersection.y);
-
-            // 🧲 MIKNATIS ETKİSİ / MAGNETISM (USER EXPERIENCE)
-            // Eğer yeni bir hat çekiliyorsa (isDrawingBeam), kullanıcının parmağı nerede olursa olsun, 
-            // 3 birim (yaklaşık 7x7 grid alanı) etrafında bir düğüm (Node) varsa otomatik olarak o düğüme kilitlen ("Snap").
-            if (isDrawingBeam) {
-                // 3.0 birim yarıçap çok geniş ve esnek bir dokunmatik alan (yaklaşık 60x60 piksel parmak ucu payı) sağlar
-                const nearest = getNearestNode(intersection.x, intersection.y, 3.0);
-                if (nearest && nearest.id !== selectedNodeId) {
-                    snappedX = nearest.x;
-                    snappedY = nearest.y;
-                }
-            }
+            const snappedX = snapToGrid(intersection.x);
+            const snappedY = snapToGrid(intersection.y);
 
             setGridPosition(new Vector3(snappedX, snappedY + offsetY, 0));
 
@@ -71,17 +59,27 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
 
         const handlePointerUp = () => {
             if (isDrawingBeam) {
-                const x = gridPosition.x;
-                const y = gridPosition.y;
-                const targetNode = getNodeAt(x, y);
+                let finalX = gridPosition.x;
+                let finalY = gridPosition.y;
+
+                // 🧲 MIKNATIS ETKİSİ / SADECE BIRAKINCA - ON DROP
+                // Parmağı havaya kaldırdığınız an: çevredeki tam 5x5 (~2 birim yarıçap) alan taranır. 
+                // Hedefte önceden atılmış mavi bir düğüm (Node) varsa anında ona yapışır.
+                const nearest = getNearestNode(finalX, finalY, 1.5);
+                if (nearest && nearest.id !== selectedNodeId) {
+                    finalX = nearest.x;
+                    finalY = nearest.y;
+                }
+
+                const targetNode = getNodeAt(finalX, finalY);
 
                 if (targetNode && targetNode.id !== selectedNodeId) {
                     // Finish beam on existing node
                     finishDrawingBeam(targetNode.id);
                 } else if (!targetNode) {
                     // Create new node and finish beam
-                    addNode(x, y);
-                    const newNode = getNodeAt(x, y);
+                    addNode(finalX, finalY);
+                    const newNode = getNodeAt(finalX, finalY);
                     if (newNode) {
                         finishDrawingBeam(newNode.id);
                     }
