@@ -32,6 +32,9 @@ const MenuScreen: React.FC = () => {
                 fontWeight: 'bold',
                 marginBottom: '2vh',
                 textShadow: '0 4px 16px rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
             }}>
                 <img src="/images/app_icon.png" alt="App Icon" style={{
                     width: 'clamp(48px, 12vh, 80px)',
