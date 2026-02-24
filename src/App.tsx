@@ -423,10 +423,7 @@ function App() {
                                 {timeLeft === 0 ? t.out_of_time : t.vehicle_fell}
                             </div>
                             <button
-                                onClick={async () => {
-                                    await AdManager.showInterstitial();
-                                    resetLevel();
-                                }}
+                                onClick={resetLevel}
                                 style={{
                                     background: 'white',
                                     color: '#F44336',
