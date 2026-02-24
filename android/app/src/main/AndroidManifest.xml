@@ -12,6 +12,14 @@
             android:value="ca-app-pub-4190858087915294~5199801146"
         />
 
+        <!-- Explicitly force AdMob's AdActivity to be Fullscreen / No ActionBar so it doesn't show the status bar over ads -->
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:replace="android:theme" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
