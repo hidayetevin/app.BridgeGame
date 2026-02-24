@@ -50,7 +50,9 @@ export default function Vehicle() {
     const [chassisRef, chassisApi] = useBox<Mesh>(() => ({
         mass: 15,
         position: [level.vehicleStart.x, level.vehicleStart.y, 0],
-        args: [1.6, 0.5, 0.8],
+        // Orijinal görünümden daha küçük bir çarpışma kutusu (Hitbox) kullanıyoruz.
+        // Bu sayede ani rampalara çıkarken arabanın tekerleği yola değmeden önce tamponu yere sürtüp arabayı takla attırmayacak.
+        args: [1.2, 0.3, 0.8],
         allowSleep: false,
         angularDamping: 0.5,
         collisionFilterGroup: 2,

@@ -75,7 +75,11 @@ const IntactBeam = ({
 
     const collisionMask = isRoad ? 2 : 0;
     const damping = isRoad ? 0.5 : 0.1;
-    const collisionThickness = isRoad ? 0.5 : customThickness;
+
+    // Sorunun Çözümü: Çarpışma Kalınlığını Bıçak Sırtı Gibi İncelt!
+    // Eğer kalas/yol yüksekliği 0.5 olursa, rampa yapıldığında eklem yerlerindeki (joint) köşeler "V" şeklinde havaya dikilir.
+    // Arabanın tekerlekleri bu dikilen sivri köşelere takılır kalır. Bunu 0.5'ten 0.05'e düşürerek sıfıra indirdik.
+    const collisionThickness = isRoad ? 0.05 : customThickness * 0.5;
 
     // Visual Depth
     const depth = isRoad ? 3 : 0.4;
