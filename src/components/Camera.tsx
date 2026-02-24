@@ -11,10 +11,10 @@ export default function Camera() {
     const level = LEVELS[gameState.levelIndex] || LEVELS[0];
     const cameraRef = useRef<THREE.OrthographicCamera>(null);
 
-    // "Ara adalar" eklendikçe kenardaki 100 birimlik blokların da x hesaba katılıyordu.
-    // Artık sadece OYNANABİLİR 'bağlantı noktaları (anchors)' hesaba katılacak.
-    const minX = Math.min(...level.anchors.map(a => a.x));
-    const maxX = Math.max(...level.anchors.map(a => a.x));
+    // Artık hem 'bağlantı noktaları (anchors)' hem de 'aracın başlama ve bitiş noktaları' hesaba katılacak.
+    // Bu sayede araba köprü başlangıcının 10 metre uzağında doğsa bile ekranın dışında kalmaz.
+    const minX = Math.min(...level.anchors.map(a => a.x), level.vehicleStart.x);
+    const maxX = Math.max(...level.anchors.map(a => a.x), level.vehicleTarget);
     const span = maxX - minX;
 
     // We base vertical camera alignment on the lowest platform

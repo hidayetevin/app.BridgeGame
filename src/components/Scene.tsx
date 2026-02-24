@@ -7,6 +7,7 @@ import NodeComponent from './NodeComponent';
 import BeamComponent from './BeamComponent';
 import GhostBeam from './GhostBeam';
 import PhysicsWorld from './PhysicsWorld';
+import { VehiclePreview } from './Vehicle';
 import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
 import GroundVisual from './GroundVisual';
@@ -107,6 +108,9 @@ export default function Scene() {
                             type={node.type}
                         />
                     ))}
+
+                    {/* Preview Vehicle so player knows where it spawns */}
+                    <VehiclePreview />
                 </>
             )}
 

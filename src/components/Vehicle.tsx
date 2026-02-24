@@ -25,6 +25,30 @@ function CarBodyGLB({ glbPath, previewScale }: { glbPath: string; previewScale: 
     );
 }
 
+// ─── Static Visual Preview for Editor Mode ──────────────────────────────────────
+export function VehiclePreview() {
+    const { gameState } = useGameStore();
+    const level = LEVELS[gameState.levelIndex];
+    if (!level) return null;
+
+    const equippedId = gameState.equippedCar || DEFAULT_CAR;
+    const carData = CARS.find(c => c.id === equippedId) || CARS[0];
+    const carGlbPath = GLB_BASE + equippedId + '.glb';
+
+    return (
+        <group position={[level.vehicleStart.x, level.vehicleStart.y, 0]}>
+            <Suspense fallback={
+                <mesh position={[0, 0.1, 0]}>
+                    <boxGeometry args={[1.5, 0.38, 0.8]} />
+                    <meshStandardMaterial color="#e53935" roughness={0.3} metalness={0.5} />
+                </mesh>
+            }>
+                <CarBodyGLB glbPath={carGlbPath} previewScale={carData.previewScale} />
+            </Suspense>
+        </group>
+    );
+}
+
 // ─── Main Vehicle ─────────────────────────────────────────────────────────────
 export default function Vehicle() {
     const { gameState, setWon, setLost } = useGameStore();
