@@ -54,9 +54,9 @@ export default function PhysicsWorld() {
                     <Ground
                         key={`ground-${index}`}
                         x={p.x}
-                        y={p.y - 2.5}
+                        y={p.y - 50}
                         width={p.width}
-                        height={5}
+                        height={100}
                     />
                 ))}
             </Physics>

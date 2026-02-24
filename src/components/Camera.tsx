@@ -11,9 +11,10 @@ export default function Camera() {
     const level = LEVELS[gameState.levelIndex] || LEVELS[0];
     const cameraRef = useRef<THREE.OrthographicCamera>(null);
 
-    // Find the total span and lowest point among all platforms
-    const minX = Math.min(...level.platforms.map(p => p.x));
-    const maxX = Math.max(...level.platforms.map(p => p.x));
+    // "Ara adalar" eklendikçe kenardaki 100 birimlik blokların da x hesaba katılıyordu.
+    // Artık sadece OYNANABİLİR 'bağlantı noktaları (anchors)' hesaba katılacak.
+    const minX = Math.min(...level.anchors.map(a => a.x));
+    const maxX = Math.max(...level.anchors.map(a => a.x));
     const span = maxX - minX;
 
     // We base vertical camera alignment on the lowest platform
@@ -23,12 +24,15 @@ export default function Camera() {
     const camX = (minX + maxX) / 2;
 
     // KURAL 2: Köprü uçlarının ekranda görünecek "Minimum Genişliği" (Sarı Çizgi)
-    // Boşluğun (gap) en az yarısı kadar kara parçasını sağda ve solda göstermeye zorluyoruz.
-    const minPadding = Math.max(5, span * 0.4);
-    const targetWidth = span + (minPadding * 2);
+    // Sabit bir rakam değil! Seviyenin mesafesine göre dinamik ayar. Şişme veya daralmaları önler.
+    const paddingX = Math.max(4, span * 0.25);
+    const targetWidth = span + (paddingX * 2);
 
-    // Oyuncunun devasa asma köprüler yapabilmesi için dikeyde de güvenli bir yükseklik sınırı koyuyoruz
-    const targetHeight = 16;
+    // Dikey Yükseklik de artık seviyelere özel!
+    // Kimi dev köprülere yüksek grid lazımsa ona göre büyüyecek, standart köprülerde küçük kalacak.
+    const maxY = Math.max(...level.anchors.map(a => a.y));
+    const dynamicHeight = Math.max(12, (maxY - minY) + 8);
+    const targetHeight = dynamicHeight;
 
     // Ekranın Genişliğine veya Yüksekliğine göre kameranın kaç birim Zoom yapması gerektiğini hesaplar
     const zoomX = size.width / targetWidth;

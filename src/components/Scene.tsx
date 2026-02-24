@@ -70,8 +70,8 @@ export default function Scene() {
                 <>
                     {/* Dynamic Ground Platforms */}
                     {level.platforms.map((p, index) => (
-                        <group key={`vis-ground-${index}`} position={[p.x, p.y - 2.5, 0]}>
-                            <GroundVisual width={p.width} height={5} />
+                        <group key={`vis-ground-${index}`} position={[p.x, p.y - 50, 0]}>
+                            <GroundVisual width={p.width} height={100} />
                         </group>
                     ))}
                 </>

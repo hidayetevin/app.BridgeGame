@@ -25,70 +25,70 @@ function createLevel(name, budget, anchors, vehicleStart, vehicleTarget, waterLe
 createLevel('Eğitim Köprüsü', 500,
     [{ x: -4.5, y: -2 }, { x: 4.5, y: -2 }],
     { x: -12, y: -1 }, 6, -6,
-    [{ x: -14.5, y: -2, width: 20 }, { x: 14.5, y: -2, width: 20 }]
+    [{ x: -54.5, y: -2, width: 100 }, { x: 54.5, y: -2, width: 100 }]
 );
 
 // 2. Biraz daha uzun
 createLevel('Daha Geniş Vadi', 700,
     [{ x: -6, y: -1 }, { x: 6, y: -1 }],
     { x: -14, y: 0 }, 8, -6,
-    [{ x: -16, y: -1, width: 20 }, { x: 16, y: -1, width: 20 }]
+    [{ x: -56, y: -1, width: 100 }, { x: 56, y: -1, width: 100 }]
 );
 
 // 3. Desteksiz
 createLevel('Desteksiz Geçiş', 1000,
     [{ x: -8, y: 0 }, { x: 8, y: 0 }],
     { x: -16, y: 1 }, 10, -6,
-    [{ x: -18, y: 0, width: 20 }, { x: 18, y: 0, width: 20 }]
+    [{ x: -58, y: 0, width: 100 }, { x: 58, y: 0, width: 100 }]
 );
 
 // 4. İlk Ara Ada
 createLevel('İlk Ada', 1200,
     [{ x: -9, y: 0 }, { x: -2, y: 0 }, { x: 2, y: 0 }, { x: 9, y: 0 }],
     { x: -17, y: 1 }, 11, -5,
-    [{ x: -19, y: 0, width: 20 }, { x: 0, y: 0, width: 4 }, { x: 19, y: 0, width: 20 }]
+    [{ x: -59, y: 0, width: 100 }, { x: 0, y: 0, width: 4 }, { x: 59, y: 0, width: 100 }]
 );
 
 // 5. İkiz Adalar
 createLevel('İkiz Adalar', 1500,
     [{ x: -12, y: 0 }, { x: -5, y: -1 }, { x: -1, y: -1 }, { x: 5, y: -1 }, { x: 9, y: -1 }, { x: 15, y: 0 }],
     { x: -20, y: 1 }, 18, -6,
-    [{ x: -22, y: 0, width: 20 }, { x: -3, y: -1, width: 4 }, { x: 7, y: -1, width: 4 }, { x: 25, y: 0, width: 20 }]
+    [{ x: -62, y: 0, width: 100 }, { x: -3, y: -1, width: 4 }, { x: 7, y: -1, width: 4 }, { x: 65, y: 0, width: 100 }]
 );
 
 // 6. Ufak Bir Rampa
 createLevel('Isınma Rampası', 800,
     [{ x: -5, y: -2 }, { x: 5, y: 0 }],
     { x: -15, y: -1 }, 8, -6,
-    [{ x: -15, y: -2, width: 20 }, { x: 15, y: 0, width: 20 }]
+    [{ x: -55, y: -2, width: 100 }, { x: 55, y: 0, width: 100 }]
 );
 
 // 7. Sarp Boğaz
 createLevel('Sarp Boğaz', 1100,
     [{ x: -7, y: -3 }, { x: -1, y: 2 }, { x: 7, y: 2 }],
     { x: -15, y: -2 }, 10, -8,
-    [{ x: -17, y: -3, width: 20 }, { x: -4, y: 2, width: 6 }, { x: 17, y: 2, width: 20 }]
+    [{ x: -57, y: -3, width: 100 }, { x: -4, y: 2, width: 6 }, { x: 57, y: 2, width: 100 }]
 );
 
 // 8. Bütçe Krizi
 createLevel('Bütçe Krizi', 350,
     [{ x: -5, y: 0 }, { x: 5, y: 0 }],
     { x: -12, y: 1 }, 8, -6,
-    [{ x: -15, y: 0, width: 20 }, { x: 15, y: 0, width: 20 }]
+    [{ x: -55, y: 0, width: 100 }, { x: 55, y: 0, width: 100 }]
 );
 
 // 9. Merdivenler
 createLevel('Merdivenler', 1800,
     [{ x: -12, y: -4 }, { x: -4, y: -1 }, { x: 4, y: 2 }, { x: 12, y: 5 }],
     { x: -20, y: -3 }, 15, -8,
-    [{ x: -22, y: -4, width: 20 }, { x: -8, y: -1, width: 8 }, { x: 0, y: 2, width: 8 }, { x: 22, y: 5, width: 20 }]
+    [{ x: -62, y: -4, width: 100 }, { x: -8, y: -1, width: 8 }, { x: 0, y: 2, width: 8 }, { x: 62, y: 5, width: 100 }]
 );
 
 // 10. Çelik İhtiyacı
 createLevel('Çelik Şart', 1100,
     [{ x: -10, y: 0 }, { x: 10, y: 0 }],
     { x: -18, y: 1 }, 12, -8,
-    [{ x: -20, y: 0, width: 20 }, { x: 20, y: 0, width: 20 }]
+    [{ x: -60, y: 0, width: 100 }, { x: 60, y: 0, width: 100 }]
 );
 
 // -----------------------------------------------------
@@ -112,7 +112,7 @@ for (let i = 11; i <= 50; i++) {
     let currentY = (Math.random() * 4) - 2;
 
     // Start platform
-    platforms.push({ x: currentX - 10, y: currentY, width: 20 });
+    platforms.push({ x: currentX - 50, y: currentY, width: 100 });
     anchors.push({ x: currentX, y: currentY });
 
     const startCarX = currentX - 6;
@@ -134,7 +134,7 @@ for (let i = 11; i <= 50; i++) {
 
     // End platform
     let endY = currentY + ((Math.random() * 8) - 4);
-    platforms.push({ x: endXVal + 10, y: endY, width: 20 });
+    platforms.push({ x: endXVal + 50, y: endY, width: 100 });
     anchors.push({ x: endXVal, y: endY });
 
     let targetCar = endXVal + 4;
