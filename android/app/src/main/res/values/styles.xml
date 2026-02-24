@@ -23,14 +23,4 @@
         <item name="android:windowDrawsSystemBarBackgrounds">false</item>
         <item name="android:background">@drawable/splash</item>
     </style>
-
-    <!-- Specific theme to force AdMob full-screen and hide navigation bar -->
-    <style name="AdTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-    </style>
 </resources>

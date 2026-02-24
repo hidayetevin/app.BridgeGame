@@ -43,6 +43,7 @@ async function preloadInterstitial() {
         await AdMob.prepareInterstitial({
             adId: AdConfig.interstitial,
             isTesting: false,
+            immersiveMode: true,
         });
         interstitialReady = true;
         console.log('[AdManager] Interstitial preloaded ✓');
@@ -62,6 +63,7 @@ async function preloadRewarded() {
         await AdMob.prepareRewardVideoAd({
             adId: AdConfig.rewarded,
             isTesting: false,
+            immersiveMode: true,
         });
         rewardedReady = true;
         console.log('[AdManager] Rewarded preloaded ✓');
