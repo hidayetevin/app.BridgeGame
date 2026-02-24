@@ -49,6 +49,7 @@ interface GameStore {
     removeNode: (id: string) => void;
     getNodeById: (id: string) => Node | undefined;
     getNodeAt: (x: number, y: number) => Node | undefined;
+    getNearestNode: (x: number, y: number, radius: number) => Node | undefined;
 
     // Actions - Beams
     addBeam: (startNodeId: string, endNodeId: string, material: MaterialType) => void;
@@ -148,6 +149,21 @@ export const useGameStore = create<GameStore>()(
 
             getNodeAt: (x, y) => {
                 return get().nodes.find((n) => n.x === x && n.y === y);
+            },
+
+            getNearestNode: (x, y, radius) => {
+                let nearestNode: Node | undefined = undefined;
+                let minDist = radius;
+
+                get().nodes.forEach((n) => {
+                    const dist = Math.sqrt(Math.pow(n.x - x, 2) + Math.pow(n.y - y, 2));
+                    if (dist <= minDist) {
+                        minDist = dist;
+                        nearestNode = n;
+                    }
+                });
+
+                return nearestNode;
             },
 
             recordAction: (type, addedNodes, addedBeams, removedBeams, costChange) => {

@@ -20,6 +20,7 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
     const {
         addNode,
         getNodeAt,
+        getNearestNode,
         isDrawingBeam,
         updateGhostBeam,
         finishDrawingBeam,
@@ -33,8 +34,20 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
         raycaster.current.ray.intersectPlane(plane.current, intersection);
 
         if (intersection) {
-            const snappedX = snapToGrid(intersection.x);
-            const snappedY = snapToGrid(intersection.y);
+            let snappedX = snapToGrid(intersection.x);
+            let snappedY = snapToGrid(intersection.y);
+
+            // 🧲 MIKNATIS ETKİSİ / MAGNETISM (USER EXPERIENCE)
+            // Eğer yeni bir hat çekiliyorsa (isDrawingBeam), kullanıcının parmağı nerede olursa olsun, 
+            // 3 birim (yaklaşık 7x7 grid alanı) etrafında bir düğüm (Node) varsa otomatik olarak o düğüme kilitlen ("Snap").
+            if (isDrawingBeam) {
+                // 3.0 birim yarıçap çok geniş ve esnek bir dokunmatik alan (yaklaşık 60x60 piksel parmak ucu payı) sağlar
+                const nearest = getNearestNode(intersection.x, intersection.y, 3.0);
+                if (nearest && nearest.id !== selectedNodeId) {
+                    snappedX = nearest.x;
+                    snappedY = nearest.y;
+                }
+            }
 
             setGridPosition(new Vector3(snappedX, snappedY + offsetY, 0));
 
@@ -89,7 +102,7 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
             canvas.removeEventListener('pointerleave', handlePointerLeave);
             canvas.removeEventListener('pointerup', handlePointerUp);
         };
-    }, [size, gl, isDrawingBeam, gridPosition, getNodeAt, addNode, finishDrawingBeam, cancelDrawingBeam, selectedNodeId]);
+    }, [size, gl, isDrawingBeam, gridPosition, getNodeAt, getNearestNode, addNode, finishDrawingBeam, cancelDrawingBeam, selectedNodeId]);
 
     if (!isVisible) return null;
 
