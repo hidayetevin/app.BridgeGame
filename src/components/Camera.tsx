@@ -11,10 +11,21 @@ export default function Camera() {
     const level = LEVELS[gameState.levelIndex] || LEVELS[0];
     const cameraRef = useRef<THREE.OrthographicCamera>(null);
 
+    // Find the total span and lowest point among all platforms
+    const minX = Math.min(...level.platforms.map(p => p.x));
+    const maxX = Math.max(...level.platforms.map(p => p.x));
+    const span = maxX - minX;
+
+    // We base vertical camera alignment on the lowest platform
+    const minY = Math.min(...level.platforms.map(p => p.y));
+
+    // Center of the bridge
+    const camX = (minX + maxX) / 2;
+
     // KURAL 2: Köprü uçlarının ekranda görünecek "Minimum Genişliği" (Sarı Çizgi)
     // Boşluğun (gap) en az yarısı kadar kara parçasını sağda ve solda göstermeye zorluyoruz.
-    const minPadding = Math.max(5, level.gap * 0.4);
-    const targetWidth = level.gap + (minPadding * 2);
+    const minPadding = Math.max(5, span * 0.4);
+    const targetWidth = span + (minPadding * 2);
 
     // Oyuncunun devasa asma köprüler yapabilmesi için dikeyde de güvenli bir yükseklik sınırı koyuyoruz
     const targetHeight = 16;
@@ -25,26 +36,26 @@ export default function Camera() {
     const zoom = Math.min(zoomX, zoomY);
 
     // KURAL 1: Köprü uçları yüksekliği (Kırmızı Çizgi)
-    // Kamerayı, köprünün Y yüzeyi (platformY) her zaman ekranın alt %25 - %35'lik kısmına denk gelecek şekilde hizalarız.
+    // Kamerayı, köprünün Y yüzeyi (minY) her zaman ekranın alt %25 - %35'lik kısmına denk gelecek şekilde hizalarız.
     const visibleHeight = size.height / zoom;
-    const camY = level.platformY + visibleHeight * 0.30;
+    const camY = minY + visibleHeight * 0.30;
 
     useEffect(() => {
         if (cameraRef.current) {
             // Kamerayı +5 birim yukarı koyup aşağı doğru açılı bakmasını sağlıyoruz.
             // Aksi halde (camY ile aynı hizada olunca) 0 kalınlığındaki (tam yatay) yollar görünmez!
-            cameraRef.current.position.set(0, camY + 5, 20);
-            cameraRef.current.lookAt(0, camY, 0);
+            cameraRef.current.position.set(camX, camY + 5, 20);
+            cameraRef.current.lookAt(camX, camY, 0);
             cameraRef.current.updateProjectionMatrix();
         }
-    }, [camY, zoom, size]); // size is updated on resize/orientation change
+    }, [camX, camY, zoom, size]); // size is updated on resize/orientation change
 
     return (
         <OrthographicCamera
             ref={cameraRef}
             makeDefault
             zoom={zoom}
-            position={[0, camY + 5, 20]}
+            position={[camX, camY + 5, 20]}
             near={0.1}
             far={1000}
         />

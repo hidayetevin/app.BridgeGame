@@ -36,10 +36,6 @@ export interface LevelData {
     vehicleStart: { x: number; y: number };
     vehicleTarget: number;
     waterLevel: number;
-    gap: number;
-    platformLeftX: number;
-    platformRightX: number;
-    platformY: number;
-    platformWidth: number;
+    platforms: Array<{ x: number; y: number; width: number }>;
     timeLimit: number; // Seconds
 }

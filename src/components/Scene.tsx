@@ -68,15 +68,12 @@ export default function Scene() {
             {/* Editor/Visual Ground (Non-Physics) */}
             {!isSimulating && level && (
                 <>
-                    {/* Left Ground Platform */}
-                    <group position={[level.platformLeftX, level.platformY - 2.5, 0]}>
-                        <GroundVisual width={level.platformWidth} height={5} />
-                    </group>
-
-                    {/* Right Ground Platform */}
-                    <group position={[level.platformRightX, level.platformY - 2.5, 0]}>
-                        <GroundVisual width={level.platformWidth} height={5} />
-                    </group>
+                    {/* Dynamic Ground Platforms */}
+                    {level.platforms.map((p, index) => (
+                        <group key={`vis-ground-${index}`} position={[p.x, p.y - 2.5, 0]}>
+                            <GroundVisual width={p.width} height={5} />
+                        </group>
+                    ))}
                 </>
             )}
 

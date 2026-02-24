@@ -49,21 +49,16 @@ export default function PhysicsWorld() {
                 {/* Vehicle */}
                 <Vehicle />
 
-                {/* Left Ground Platform */}
-                <Ground
-                    x={level.platformLeftX}
-                    y={level.platformY - 2.5}
-                    width={level.platformWidth}
-                    height={5}
-                />
-
-                {/* Right Ground Platform */}
-                <Ground
-                    x={level.platformRightX}
-                    y={level.platformY - 2.5}
-                    width={level.platformWidth}
-                    height={5}
-                />
+                {/* Dynamic Ground Platforms for collision */}
+                {level.platforms.map((p, index) => (
+                    <Ground
+                        key={`ground-${index}`}
+                        x={p.x}
+                        y={p.y - 2.5}
+                        width={p.width}
+                        height={5}
+                    />
+                ))}
             </Physics>
         </>
     );
