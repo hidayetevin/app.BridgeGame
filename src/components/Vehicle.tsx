@@ -72,7 +72,7 @@ export default function Vehicle() {
 
     // 1. Chassis
     const [chassisRef, chassisApi] = useBox<Mesh>(() => ({
-        mass: 15,
+        mass: 15, // Ağırlığı normale çektik çünkü fizik motoru ince yolları delip geçiyor ("Tunneling" efekti)
         position: [level.vehicleStart.x, level.vehicleStart.y, 0],
         // Orijinal görünümden daha küçük bir çarpışma kutusu (Hitbox) kullanıyoruz.
         // Bu sayede ani rampalara çıkarken arabanın tekerleği yola değmeden önce tamponu yere sürtüp arabayı takla attırmayacak.
@@ -86,20 +86,20 @@ export default function Vehicle() {
 
     // 2. Rear wheel
     const [wheel1Ref, wheel1Api] = useSphere<Mesh>(() => ({
-        mass: 2,
+        mass: 3,
         position: [level.vehicleStart.x - 0.6, level.vehicleStart.y - 0.4, 0],
         args: [0.45],
-        friction: 2,
+        friction: 5, // Daha stabil bir tutunma değeri, 25 fizik kurallarını ihlal edip yeri kırıyordu
         collisionFilterGroup: 2,
         collisionFilterMask: 1 | 4,
     }));
 
     // 3. Front wheel
     const [wheel2Ref, wheel2Api] = useSphere<Mesh>(() => ({
-        mass: 2,
+        mass: 3,
         position: [level.vehicleStart.x + 0.6, level.vehicleStart.y - 0.4, 0],
         args: [0.45],
-        friction: 2,
+        friction: 5,
         collisionFilterGroup: 2,
         collisionFilterMask: 1 | 4,
     }));
@@ -143,10 +143,10 @@ export default function Vehicle() {
             setLost(true);
         }
 
-        // Drive
+        // Drive - 4x4 Motor Gücü (Daha yüksek tork)
         if (!hasWon.current && !hasFallen.current) {
-            wheel1Api.angularVelocity.set(0, 0, -20);
-            wheel2Api.angularVelocity.set(0, 0, -20);
+            wheel1Api.angularVelocity.set(0, 0, -25);
+            wheel2Api.angularVelocity.set(0, 0, -25);
         }
     });
 
