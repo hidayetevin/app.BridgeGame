@@ -8,7 +8,7 @@ Bu doküman, "**Bridge Master**" (`com.evnlabs.bridgemaster`) oyununun Google Pl
 
 ## 2. Oynanış ve Seviyeler (Gameplay & Level Design)
 *   **[YAPILDI] 1. Level İçin Görsel Eğitim (Tutorial):** İlk seviye olan "Eğitim Köprüsü"ne özel, eğer hiç kiriş çizilmemişse beliren parmak (`👆`) animasyonlu bir **TutorialGuide** bileşeni oluşturuldu. Kılavuz, oyuncuya başlangıç noktasından bitiş noktasına basılı tutarak sürüklemesi gerektiğini gösterir.
-*   **[EKSİK] Hata / Yenilgi Geri Bildirimi:** Araba düştüğünde ya da köprü kırıldığında oyuncuya basit kısa metinler çıkarılmalıdır (Örn: "Çok Zayıf Bir Yapı", "Daha Fazla Destek Gerek" vs.).
+*   **[YAPILDI] Hata / Yenilgi Geri Bildirimi:** Oyun kaybedildiğinde (kaybetme nedenini tutan `failReason` State'i eklendi), Yenilgi Modal'ında "Araç Suya Düştü!", "Araç Köprüyü Kırdı!" veya "Süre Doldu!" şeklinde özelleştirilmiş, net dönütler yazılıyor.
 *   **[GÖZDEN GEÇİR] Bütçe / Zorluk Dengesi:** 51 adet levelin bütçe ve uzunlukları (zorluk eğrisi) sürekli test edilmeli, imkansız leveller düzeltilmelidir.
 
 ## 3. Kullanıcı Deneyimi ve Arayüz (UX/UI)

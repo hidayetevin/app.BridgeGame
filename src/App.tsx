@@ -12,7 +12,7 @@ import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
 function App() {
-    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars } = useGameStore();
+    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, failReason, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
     const t = translations[gameState.language];
     const [isPaused, setIsPaused] = useState(false);
@@ -417,10 +417,10 @@ function App() {
                         }}>
                             <div style={{ fontSize: 'clamp(48px, 10vh, 64px)', marginBottom: 'max(8px, 2vh)' }}>💀</div>
                             <div style={{ fontSize: 'clamp(20px, 4vh, 32px)', fontWeight: 'bold', marginBottom: 'max(4px, 1vh)' }}>
-                                {timeLeft === 0 ? t.times_up : t.bridge_failed}
+                                {timeLeft === 0 ? t.times_up : (failReason ? 'Başarısız' : t.bridge_failed)}
                             </div>
                             <div style={{ fontSize: 'clamp(14px, 3vh, 18px)', marginBottom: 'max(16px, 3vh)', opacity: 0.9 }}>
-                                {timeLeft === 0 ? t.out_of_time : t.vehicle_fell}
+                                {failReason || (timeLeft === 0 ? t.out_of_time : t.vehicle_fell)}
                             </div>
                             <button
                                 onClick={resetLevel}

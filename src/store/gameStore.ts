@@ -39,6 +39,7 @@ interface GameStore {
     // Win/Loss State
     hasWon: boolean;
     hasLost: boolean;
+    failReason: string | null;
 
     // Timer State
     timeLeft: number;
@@ -81,7 +82,7 @@ interface GameStore {
     setLanguage: (lang: 'en' | 'tr') => void;
     setMode: (mode: 'editor' | 'simulation') => void;
     setWon: (won: boolean) => void;
-    setLost: (lost: boolean) => void;
+    setLost: (lost: boolean, reason?: string | null) => void;
     loadLevel: (index: number) => void;
     resetLevel: () => void;
     addBudget: (amount: number) => void;
@@ -119,6 +120,7 @@ export const useGameStore = create<GameStore>()(
             brokenBeamIds: new Set(),
             hasWon: false,
             hasLost: false,
+            failReason: null,
             timeLeft: 0,
             isTimerRunning: false,
 
@@ -258,10 +260,20 @@ export const useGameStore = create<GameStore>()(
             },
 
             breakBeam: (id) => {
-                set((state) => ({
-                    brokenBeamIds: new Set([...state.brokenBeamIds, id]),
-                    // Do NOT remove from beams array, so it stays visible (but broken)
-                }));
+                const { hasWon } = get();
+                if (!hasWon) {
+                    set((state) => ({
+                        brokenBeamIds: new Set([...state.brokenBeamIds, id]),
+                        hasLost: true,
+                        isTimerRunning: false,
+                        failReason: 'Araç Köprüyü Kırdı!',
+                    }));
+                } else {
+                    // Even if won, simply break it visually without losing the game
+                    set((state) => ({
+                        brokenBeamIds: new Set([...state.brokenBeamIds, id]),
+                    }));
+                }
             },
 
             // Construction Actions
@@ -504,7 +516,7 @@ export const useGameStore = create<GameStore>()(
                     set({ timeLeft: newTime });
 
                     if (newTime === 0) {
-                        set({ hasLost: true, isTimerRunning: false });
+                        set({ hasLost: true, isTimerRunning: false, failReason: 'Süre Doldu!' });
                     }
                 }
             },
@@ -524,6 +536,7 @@ export const useGameStore = create<GameStore>()(
                         brokenBeamIds: mode === 'editor' ? new Set() : state.brokenBeamIds,
                         hasWon: false,
                         hasLost: false,
+                        failReason: null,
                         timeLeft: mode === 'simulation' ? timeLimit : 0,
                         isTimerRunning: mode === 'simulation',
                     };
@@ -561,10 +574,10 @@ export const useGameStore = create<GameStore>()(
                     });
                 }
             },
-            setLost: (lost) => {
+            setLost: (lost, reason = null) => {
                 const { hasWon } = get();
                 if (!hasWon) {
-                    set({ hasLost: lost, isTimerRunning: false });
+                    set({ hasLost: lost, isTimerRunning: false, failReason: lost ? reason : null });
                 }
             },
 
@@ -583,6 +596,7 @@ export const useGameStore = create<GameStore>()(
                     brokenBeamIds: new Set(),
                     hasWon: false,
                     hasLost: false,
+                    failReason: null,
                     timeLeft: 0,
                     isTimerRunning: false,
                     gameState: {

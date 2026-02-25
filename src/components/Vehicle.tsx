@@ -140,7 +140,7 @@ export default function Vehicle() {
         // Fall check
         if (posY.current < level.waterLevel && !hasFallen.current && !hasWon.current) {
             hasFallen.current = true;
-            setLost(true);
+            setLost(true, 'Araç Suya Düştü!');
         }
 
         // Drive - 4x4 Motor Gücü (Daha yüksek tork)
