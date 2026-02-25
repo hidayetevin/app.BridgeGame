@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
+import * as THREE from 'three';
 import { Image } from '@react-three/drei';
 import Camera from './Camera';
 import Cursor from './Cursor';
@@ -17,24 +18,29 @@ export default function Scene() {
     const isSimulating = gameState.mode === 'simulation';
     const level = LEVELS[gameState.levelIndex];
 
-    // Background Image Component (Responsive)
-    const ResponsiveBackground = ({ waterLevel }: { waterLevel: number }) => {
-        const { viewport } = useThree();
+    // Background Image Component — tam ekrana oturur
+    const ResponsiveBackground = () => {
+        const { viewport, camera } = useThree();
 
-        // Calculate a scale that covers both landscape and portrait mobile screens
-        // viewport.width/height gives us exactly the visible area in 3D units.
-        // We make it 50% larger (1.5x) to have a safe margin for camera panning.
-        const bgWidth = Math.max(viewport.width, viewport.height) * 1.5;
-        const bgHeight = bgWidth; // Square scale to preserve aspect without stretching
+        // 1. "Beyaz boşluk kalmaması" için genişlik tam, yükseklik %130 olarak ayarlanır.
+        // Yüksekliği fazla tutuyoruz ki, resmi aşağı kaydırdığımızda üstten beyazlık çıkmasın.
+        const bgWidth = viewport.width * 1.05;
+        const bgHeight = viewport.height * 1.30;
+
+        // 2. Kameranın Y merkezini bul.
+        const oCam = camera as THREE.OrthographicCamera;
+        const camCenterY = (oCam.top + oCam.bottom) / 2;
+
+        // 3. Resmi aşağı kaydır (- işareti yönümüzü aşağı çevirir).
+        // Böylece resmin alt tarafındaki sular kadrajın içine (kameraların gördüğü alana) girer.
+        const posY = camCenterY - (viewport.height * 0.10);
 
         return (
             <Suspense fallback={null}>
                 <Image
                     url="/images/background.png"
                     transparent
-                    // Position Y so the horizon (middle of the image) is slightly above the water level,
-                    // ensuring the bottom half (water) is perfectly visible underneath the bridge.
-                    position={[0, waterLevel + (bgHeight * 0.1), -29]}
+                    position={[camera.position.x, posY, -37]}
                     scale={[bgWidth, bgHeight]}
                 />
             </Suspense>
@@ -63,7 +69,7 @@ export default function Scene() {
 
             {/* Environment: Background Image perfectly scaled for mobile/desktop */}
             {level && (
-                <ResponsiveBackground waterLevel={level.waterLevel} />
+                <ResponsiveBackground />
             )}
 
             {/* Editor/Visual Ground (Non-Physics) */}
