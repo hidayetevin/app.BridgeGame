@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">BridgeGame</string>
-    <string name="title_activity_main">BridgeGame</string>
-    <string name="package_name">com.bridge.game</string>
-    <string name="custom_url_scheme">com.bridge.game</string>
+    <string name="app_name">Bridge Master</string>
+    <string name="title_activity_main">Bridge Master</string>
+    <string name="package_name">com.evnlabs.bridgemaster</string>
+    <string name="custom_url_scheme">com.evnlabs.bridgemaster</string>
 </resources>
