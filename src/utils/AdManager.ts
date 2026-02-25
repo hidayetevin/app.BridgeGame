@@ -10,11 +10,11 @@ import {
 import { Capacitor } from '@capacitor/core';
 
 export const AdConfig = {
-    appId: 'ca-app-pub-4190858087915294~5199801146',
-    banner: 'ca-app-pub-4190858087915294/4014566191',
-    interstitial: 'ca-app-pub-4190858087915294/3886719476',
-    rewarded: 'ca-app-pub-4190858087915294/6856351954',
-    native: 'ca-app-pub-4190858087915294/1479543408',
+    appId: 'ca-app-pub-4190858087915294~9982889385',
+    banner: 'ca-app-pub-4190858087915294/6941793072',
+    interstitial: 'ca-app-pub-4190858087915294/3002906858',
+    rewarded: 'ca-app-pub-4190858087915294/8669807717',
+    native: 'ca-app-pub-4190858087915294/1479543408', // Using existing native ad unit if available.
 };
 
 // --- Internal state ---

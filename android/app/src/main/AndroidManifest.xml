@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-4190858087915294~5199801146"
+            android:value="ca-app-pub-4190858087915294~9982889385"
         />
 
         <!-- Explicitly force AdMob's AdActivity to be Fullscreen / No ActionBar so it doesn't show the status bar over ads -->
