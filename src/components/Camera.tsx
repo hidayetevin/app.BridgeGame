@@ -29,9 +29,11 @@ export default function Camera() {
     const targetWidth = span + (paddingX * 2);
 
     // Dikey Yükseklik de artık seviyelere özel!
-    // Kimi dev köprülere yüksek grid lazımsa ona göre büyüyecek, standart köprülerde küçük kalacak.
+    // Su görünsün diye minY'nin altına da biraz pay bırakıyoruz (waterLevel'e kadar).
+    const waterLevel = level.waterLevel ?? -10;
+    const bottomY = Math.min(minY, waterLevel);
     const maxY = Math.max(...level.anchors.map(a => a.y));
-    const dynamicHeight = Math.max(12, (maxY - minY) + 8);
+    const dynamicHeight = Math.max(14, (maxY - bottomY) + 6);
     const targetHeight = dynamicHeight;
 
     // Ekranın Genişliğine veya Yüksekliğine göre kameranın kaç birim Zoom yapması gerektiğini hesaplar
@@ -39,11 +41,10 @@ export default function Camera() {
     const zoomY = size.height / targetHeight;
     const zoom = Math.min(zoomX, zoomY);
 
-    // KURAL 1: Köprü uçları yüksekliği (Kırmızı Çizgi)
-    // Kamerayı, köprünün Y yüzeyi (minY) her zaman ekranın alt %25 - %35'lik kısmına denk gelecek şekilde hizalarız.
+    // KURAL 1: Kamerayı hizalarken su da görünsün diye merkezi biraz yukarı alıyoruz.
+    // 0.38 → görüntünün alt %38'i platformların altında (su bölgesi) kalır.
     const visibleHeight = size.height / zoom;
-    const camY = minY + visibleHeight * 0.30;
-
+    const camY = bottomY + visibleHeight * 0.50;
     useEffect(() => {
         if (cameraRef.current) {
             // Kamerayı +5 birim yukarı koyup aşağı doğru açılı bakmasını sağlıyoruz.

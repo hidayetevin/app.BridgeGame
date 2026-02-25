@@ -1,7 +1,6 @@
-import { Suspense } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { Image } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
 import Camera from './Camera';
+import BackgroundScene from './BackgroundScene';
 import Cursor from './Cursor';
 import NodeComponent from './NodeComponent';
 import BeamComponent from './BeamComponent';
@@ -16,30 +15,6 @@ export default function Scene() {
     const { nodes, beams, gameState } = useGameStore();
     const isSimulating = gameState.mode === 'simulation';
     const level = LEVELS[gameState.levelIndex];
-
-    // Background Image Component (Responsive)
-    const ResponsiveBackground = ({ waterLevel }: { waterLevel: number }) => {
-        const { viewport } = useThree();
-
-        // Calculate a scale that covers both landscape and portrait mobile screens
-        // viewport.width/height gives us exactly the visible area in 3D units.
-        // We make it 50% larger (1.5x) to have a safe margin for camera panning.
-        const bgWidth = Math.max(viewport.width, viewport.height) * 1.5;
-        const bgHeight = bgWidth; // Square scale to preserve aspect without stretching
-
-        return (
-            <Suspense fallback={null}>
-                <Image
-                    url="/images/background.png"
-                    transparent
-                    // Position Y so the horizon (middle of the image) is slightly above the water level,
-                    // ensuring the bottom half (water) is perfectly visible underneath the bridge.
-                    position={[0, waterLevel + (bgHeight * 0.1), -29]}
-                    scale={[bgWidth, bgHeight]}
-                />
-            </Suspense>
-        );
-    };
 
     // In game screen (editor + simulation): render every frame.
     // In menu/settings/shop: demand-only — the 3D background is static,
@@ -61,9 +36,9 @@ export default function Scene() {
             <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
             <hemisphereLight intensity={1.0} groundColor="#444444" />
 
-            {/* Environment: Background Image perfectly scaled for mobile/desktop */}
+            {/* Environment: Procedural sky + water — auto-aligned to level.waterLevel */}
             {level && (
-                <ResponsiveBackground waterLevel={level.waterLevel} />
+                <BackgroundScene waterLevel={level.waterLevel ?? -10} />
             )}
 
             {/* Editor/Visual Ground (Non-Physics) */}
