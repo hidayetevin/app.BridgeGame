@@ -151,7 +151,11 @@ const MenuScreen: React.FC = () => {
                         Aktif Seviye
                     </div>
                     <div style={{ fontSize: 'clamp(14px, 2.8vh, 18px)', fontWeight: 700, color: '#38bdf8' }}>
-                        #{gameState.levelIndex + 1} — {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
+                        <span style={{ color: 'rgba(148,163,184,0.7)', fontWeight: 500, fontSize: '0.85em' }}>
+                            {gameState.language === 'tr' ? 'Seviye' : 'Level'} {gameState.levelIndex + 1}
+                        </span>
+                        {' · '}
+                        {(t as any)[`lvl_${gameState.levelIndex}`] || currentLevel.name}
                     </div>
                     <div style={{ marginTop: '6px', display: 'flex', gap: '4px' }}>
                         {[0, 1, 2].map(i => (
