@@ -12,6 +12,7 @@ import { VehiclePreview } from './Vehicle';
 import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
 import GroundVisual from './GroundVisual';
+import TutorialGuide from './TutorialGuide';
 
 export default function Scene() {
     const { nodes, beams, gameState } = useGameStore();
@@ -89,6 +90,9 @@ export default function Scene() {
                 <>
                     {/* Interactive Cursor */}
                     <Cursor offsetY={0} />
+
+                    {/* Tutorial / Help Hand (only shows if conditions met) */}
+                    <TutorialGuide />
 
                     {/* Render all beams */}
                     {beams.map((beam) => (

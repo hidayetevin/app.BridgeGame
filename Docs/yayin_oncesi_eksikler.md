@@ -7,7 +7,7 @@ Bu doküman, "**Bridge Master**" (`com.evnlabs.bridgemaster`) oyununun Google Pl
 *   **[KONTROL] Banner Güvenli Alanı:** Banner reklam ekranın alt/üst neresinde duracaksa, oyun butonları (`Başlat`, `Geri Al` vd.) reklama "yanlışlıkla tıklanmayacak (Accidental Click)" kadar uzak bir "Padding" veya güvenli çerçeve içinde kalmalıdır. Aksi halde AdMob kısıtlama verebilir.
 
 ## 2. Oynanış ve Seviyeler (Gameplay & Level Design)
-*   **[KRİTİK] 1. Level İçin Görsel Eğitim (Tutorial):** Hipercasual oyuncular uzun yazıları okumazlar. İlk seviye "Eğitim Köprüsü"nde oyuncuya nereye basması ve ardından nereye doğru sürüklemesi gerektiğini gösteren "Hareketli bir El İkonu (Hand Pointer Animation)" veya kılavuz bir hayalet üçgen çizgi (truss system reference) gösterilmelidir.
+*   **[YAPILDI] 1. Level İçin Görsel Eğitim (Tutorial):** İlk seviye olan "Eğitim Köprüsü"ne özel, eğer hiç kiriş çizilmemişse beliren parmak (`👆`) animasyonlu bir **TutorialGuide** bileşeni oluşturuldu. Kılavuz, oyuncuya başlangıç noktasından bitiş noktasına basılı tutarak sürüklemesi gerektiğini gösterir.
 *   **[EKSİK] Hata / Yenilgi Geri Bildirimi:** Araba düştüğünde ya da köprü kırıldığında oyuncuya basit kısa metinler çıkarılmalıdır (Örn: "Çok Zayıf Bir Yapı", "Daha Fazla Destek Gerek" vs.).
 *   **[GÖZDEN GEÇİR] Bütçe / Zorluk Dengesi:** 51 adet levelin bütçe ve uzunlukları (zorluk eğrisi) sürekli test edilmeli, imkansız leveller düzeltilmelidir.
 
