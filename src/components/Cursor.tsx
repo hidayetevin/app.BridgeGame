@@ -101,6 +101,7 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
                 if (targetNode && targetNode.id !== selectedNodeId) {
                     // Finish beam on existing node
                     finishDrawingBeam(targetNode.id);
+                    AudioManager.playSound('place_node'); // Ses: mevcut node'a bağlanma
                 } else if (!targetNode) {
                     // Create new node and finish beam
                     addNode(finalX, finalY);
