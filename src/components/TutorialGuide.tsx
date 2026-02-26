@@ -6,8 +6,8 @@ import { useGameStore } from '../store/gameStore';
 export default function TutorialGuide() {
     const { gameState, beams } = useGameStore();
 
-    // Sadece 1. seviyede (index 0), oyun editör modundayken ve henüz HİÇBİR kiriş çizilmemişse görünür.
-    const isVisible = gameState.levelIndex === 0 && gameState.mode === 'editor' && beams.length === 0;
+    // Sadece 1. seviyede (index 0), oyun ekranındayken, editör modundayken ve henüz HİÇBİR kiriş çizilmemişse görünür.
+    const isVisible = gameState.screen === 'game' && gameState.levelIndex === 0 && gameState.mode === 'editor' && beams.length === 0;
 
     const handRef = useRef<HTMLDivElement>(null);
 

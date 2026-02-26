@@ -86,7 +86,7 @@ export default function Scene() {
             )}
 
             {/* EDITOR MODE - Static construction */}
-            {!isSimulating && (
+            {!isSimulating && gameState.screen === 'game' && (
                 <>
                     {/* Interactive Cursor */}
                     <Cursor offsetY={0} />
