@@ -13,6 +13,37 @@ import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import AudioManager from './utils/AudioManager';
 
+// ── Reusable Toggle Switch ─────────────────────────────────────────────────
+function ToggleRow({ icon, label, value, onChange }: {
+    icon: string; label: string; value: boolean; onChange: (v: boolean) => void;
+}) {
+    return (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0' }}>
+            <span style={{ fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {icon} {label}
+            </span>
+            <div
+                onClick={() => onChange(!value)}
+                style={{
+                    width: '48px', height: '26px', borderRadius: '13px',
+                    background: value ? '#22c55e' : 'rgba(255,255,255,0.2)',
+                    border: '1.5px solid rgba(255,255,255,0.2)',
+                    cursor: 'pointer', position: 'relative',
+                    transition: 'background 0.25s', flexShrink: 0,
+                }}
+            >
+                <div style={{
+                    position: 'absolute', top: '3px',
+                    left: value ? '23px' : '3px',
+                    width: '18px', height: '18px', borderRadius: '50%',
+                    background: 'white', transition: 'left 0.25s',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                }} />
+            </div>
+        </div>
+    );
+}
+
 function App() {
     const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, failReason, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
@@ -20,6 +51,8 @@ function App() {
     const [isPaused, setIsPaused] = useState(false);
     const [showWinActions, setShowWinActions] = useState(false);
     const [doubleUsed, setDoubleUsed] = useState(false);
+    const [pauseMusicOn, setPauseMusicOn] = useState(!AudioManager.isMusicMuted);
+    const [pauseSfxOn, setPauseSfxOn] = useState(!AudioManager.isSfxMuted);
 
     // Calculate current stars
     const percentSpent = (gameState.spent / currentLevel.budget) * 100;
@@ -595,71 +628,80 @@ function App() {
 
 
                     {/* Pause Modal */}
+                    {/* Pause Modal */}
                     {isPaused && (
                         <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            background: 'rgba(0,0,0,0.7)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            color: 'white',
-                            backdropFilter: 'blur(10px)',
-                            zIndex: 1000
+                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                            background: 'rgba(0,0,0,0.75)',
+                            display: 'flex', flexDirection: 'column',
+                            justifyContent: 'center', alignItems: 'center',
+                            color: 'white', backdropFilter: 'blur(12px)', zIndex: 1000
                         }}>
-                            <h2 style={{ fontSize: '36px', marginBottom: '32px', fontWeight: 'bold' }}>{t.pause}</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '250px' }}>
+                            <h2 style={{ fontSize: '32px', marginBottom: '24px', fontWeight: 'bold' }}>{t.pause}</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '260px' }}>
+
+                                {/* Devam Et */}
                                 <button
                                     onClick={() => setIsPaused(false)}
                                     style={{
-                                        background: '#4CAF50',
-                                        color: 'white',
-                                        padding: '16px',
-                                        borderRadius: '8px',
-                                        fontSize: '18px',
-                                        fontWeight: 'bold',
-                                        border: 'none',
-                                        cursor: 'pointer',
+                                        background: 'linear-gradient(135deg,#22c55e,#16a34a)',
+                                        color: 'white', padding: '14px', borderRadius: '12px',
+                                        fontSize: '18px', fontWeight: 'bold', border: 'none', cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(34,197,94,0.3)',
                                     }}
                                 >
                                     ▶️ {t.resume}
                                 </button>
+
+                                {/* Yeniden Başlat */}
                                 <button
-                                    onClick={() => {
-                                        setIsPaused(false);
-                                        resetLevel();
-                                    }}
+                                    onClick={() => { setIsPaused(false); resetLevel(); }}
                                     style={{
-                                        background: '#2196F3',
-                                        color: 'white',
-                                        padding: '16px',
-                                        borderRadius: '8px',
-                                        fontSize: '18px',
-                                        fontWeight: 'bold',
-                                        border: 'none',
-                                        cursor: 'pointer',
+                                        background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+                                        color: 'white', padding: '14px', borderRadius: '12px',
+                                        fontSize: '18px', fontWeight: 'bold', border: 'none', cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
                                     }}
                                 >
                                     🔄 {t.restart}
                                 </button>
+
+                                {/* ── Ses Ayarları ── */}
+                                <div style={{
+                                    background: 'rgba(255,255,255,0.07)',
+                                    borderRadius: '12px', padding: '12px 16px',
+                                    display: 'flex', flexDirection: 'column', gap: '10px',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                }}>
+                                    <ToggleRow
+                                        icon="🎵"
+                                        label={gameState.language === 'tr' ? 'Müzik' : 'Music'}
+                                        value={pauseMusicOn}
+                                        onChange={(v) => {
+                                            setPauseMusicOn(v);
+                                            AudioManager.setMusicMute(!v);
+                                        }}
+                                    />
+                                    <ToggleRow
+                                        icon="🔊"
+                                        label={gameState.language === 'tr' ? 'Ses Efektleri' : 'Sounds'}
+                                        value={pauseSfxOn}
+                                        onChange={(v) => {
+                                            setPauseSfxOn(v);
+                                            AudioManager.setSfxMute(!v);
+                                            if (v) AudioManager.playSound('click');
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Ana Menü */}
                                 <button
-                                    onClick={() => {
-                                        setIsPaused(false);
-                                        setScreen('menu');
-                                    }}
+                                    onClick={() => { setIsPaused(false); setScreen('menu'); }}
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.2)',
-                                        color: 'white',
-                                        padding: '16px',
-                                        borderRadius: '8px',
-                                        fontSize: '18px',
-                                        fontWeight: 'bold',
-                                        border: '2px solid rgba(255, 255, 255, 0.4)',
-                                        cursor: 'pointer',
+                                        background: 'rgba(255,255,255,0.12)',
+                                        color: 'white', padding: '14px', borderRadius: '12px',
+                                        fontSize: '18px', fontWeight: 'bold',
+                                        border: '1.5px solid rgba(255,255,255,0.25)', cursor: 'pointer',
                                     }}
                                 >
                                     🏠 {t.main_menu}
