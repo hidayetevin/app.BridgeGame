@@ -41,6 +41,10 @@ interface GameStore {
     hasLost: boolean;
     failReason: string | null;
 
+    // Block Notification (material restriction etc.)
+    blockReason: string | null;
+    clearBlockReason: () => void;
+
     // Timer State
     timeLeft: number;
     isTimerRunning: boolean;
@@ -121,6 +125,7 @@ export const useGameStore = create<GameStore>()(
             hasWon: false,
             hasLost: false,
             failReason: null,
+            blockReason: null,
             timeLeft: 0,
             isTimerRunning: false,
 
@@ -182,6 +187,17 @@ export const useGameStore = create<GameStore>()(
                 const startNode = state.getNodeById(startNodeId);
                 const endNode = state.getNodeById(endNodeId);
                 if (!startNode || !endNode) return;
+
+                // ── Road-Only Rule ───────────────────────────────────────────
+                // İki anchor noktası aynı Y seviyesindeyse, sadece 'road' izinlidir.
+                const bothAreAnchors = startNode.type === 'anchor' && endNode.type === 'anchor';
+                const sameYLevel = Math.abs(startNode.y - endNode.y) < 0.5;
+                if (bothAreAnchors && sameYLevel && material !== 'road') {
+                    set(() => ({ blockReason: 'road_only' }));
+                    get().cancelDrawingBeam();
+                    return;
+                }
+                // ─────────────────────────────────────────────────────────────
 
                 const dx = endNode.x - startNode.x;
                 const dy = endNode.y - startNode.y;
@@ -297,6 +313,21 @@ export const useGameStore = create<GameStore>()(
                     const endNode = nodes.find(n => n.id === endNodeId);
 
                     if (startNode && endNode) {
+                        // ── Road-Only Rule ──────────────────────────────────────
+                        // İki anchor aynı Y seviyesindeyse sadece 'road' izinlidir.
+                        const bothAreAnchors = startNode.type === 'anchor' && endNode.type === 'anchor';
+                        const sameYLevel = Math.abs(startNode.y - endNode.y) < 0.5;
+                        if (bothAreAnchors && sameYLevel && selectedMaterial !== 'road') {
+                            set(() => ({
+                                blockReason: 'road_only',
+                                selectedNodeId: null,
+                                isDrawingBeam: false,
+                                ghostBeamEnd: null,
+                            }));
+                            return;
+                        }
+                        // ──────────────────────────────────────────────────────
+
                         const dx = endNode.x - startNode.x;
                         const dy = endNode.y - startNode.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -673,6 +704,9 @@ export const useGameStore = create<GameStore>()(
                     gameState: { ...state.gameState, equippedCar: carId }
                 }));
             },
+
+            clearBlockReason: () => set({ blockReason: null }),
+
         }), {
         name: 'bridge-game-storage',
         partialize: (state) => ({

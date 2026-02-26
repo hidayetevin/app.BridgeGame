@@ -45,7 +45,7 @@ function ToggleRow({ icon, label, value, onChange }: {
 }
 
 function App() {
-    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, failReason, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars } = useGameStore();
+    const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, failReason, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars, blockReason, clearBlockReason } = useGameStore();
     const currentLevel = LEVELS[gameState.levelIndex];
     const t = translations[gameState.language];
     const [isPaused, setIsPaused] = useState(false);
@@ -116,6 +116,14 @@ function App() {
         }
     }, [hasLost]);
 
+    // Auto-clear blockReason after 2.5 seconds
+    useEffect(() => {
+        if (blockReason) {
+            const t = setTimeout(() => clearBlockReason(), 2500);
+            return () => clearTimeout(t);
+        }
+    }, [blockReason]);
+
     // Timer Logic
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -155,6 +163,32 @@ function App() {
             {/* In-Game UI */}
             {gameState.screen === 'game' && (
                 <>
+                    {/* ── Material Block Toast ── */}
+                    {blockReason === 'road_only' && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '12%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: 'rgba(239,68,68,0.92)',
+                            color: 'white',
+                            padding: '12px 22px',
+                            borderRadius: '14px',
+                            fontWeight: 700,
+                            fontSize: 'clamp(13px, 3vw, 16px)',
+                            whiteSpace: 'nowrap',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            zIndex: 500,
+                            animation: 'fadeInDown 0.3s ease',
+                            pointerEvents: 'none',
+                        }}>
+                            🚫 {gameState.language === 'tr'
+                                ? 'Bu iki nokta arasına yalnızca 🛣️ Yol kullanabilirsin!'
+                                : 'Only 🛣️ Road material is allowed between these two points!'}
+                        </div>
+                    )}
                     {/* Main UI Container with Banner Safe Area */}
                     <div style={{
                         position: 'absolute',
