@@ -4,7 +4,7 @@ Bu doküman, "**Bridge Master**" (`com.evnlabs.bridgemaster`) oyununun Google Pl
 
 ## 1. Monetizasyon & Reklamlar (AdMob)
 *   **[YAPILDI] Gerçek Reklam Kimlikleri:** `AdManager` ve `AndroidManifest.xml` içerisindeki tüm Google AdMob Test ID'leri kaldırılarak, üretim ortamına (Production) uygun olan gerçek App, Banner, Interstitial ve Rewarded kimlikleriyle başarıyla değiştirildi.
-*   **[KONTROL] Banner Güvenli Alanı:** Banner reklam ekranın alt/üst neresinde duracaksa, oyun butonları (`Başlat`, `Geri Al` vd.) reklama "yanlışlıkla tıklanmayacak (Accidental Click)" kadar uzak bir "Padding" veya güvenli çerçeve içinde kalmalıdır. Aksi halde AdMob kısıtlama verebilir.
+*   **[YAPILDI] Banner Güvenli Alanı:** Banner reklamın butonlarla çakışmaması için oyun içi arayüze 60px'lik bir "Safe Area" (alt Padding) eklendi.
 
 ## 2. Oynanış ve Seviyeler (Gameplay & Level Design)
 *   **[YAPILDI] 1. Level İçin Görsel Eğitim (Tutorial):** İlk seviye olan "Eğitim Köprüsü"ne özel, eğer hiç kiriş çizilmemişse beliren parmak (`👆`) animasyonlu bir **TutorialGuide** bileşeni oluşturuldu. Kılavuz, oyuncuya başlangıç noktasından bitiş noktasına basılı tutarak sürüklemesi gerektiğini gösterir.
@@ -12,15 +12,14 @@ Bu doküman, "**Bridge Master**" (`com.evnlabs.bridgemaster`) oyununun Google Pl
 *   **[GÖZDEN GEÇİR] Bütçe / Zorluk Dengesi:** 51 adet levelin bütçe ve uzunlukları (zorluk eğrisi) sürekli test edilmeli, imkansız leveller düzeltilmelidir.
 
 ## 3. Kullanıcı Deneyimi ve Arayüz (UX/UI)
-*   **[KRİTİK] Ses Efektleri ve Müzik (SFX):** Oyunda `AudioManager` eksikliği var.
-    *   Sürekli çalan hafif / meditatif bir Hypercasual arka plan müziği.
+*   **[YAPILDI] Ses Efektleri ve Müzik (SFX):** `AudioManager` entegre edildi.
+    *   Hypercasual arka plan müziği altyapısı kuruldu.
     *   Düğüm noktası koyarken "Tık" sesi.
-    *   Köprü gerilirken tahta/çelik "Tak" veya "Gıcırdama" sesleri.
-    *   Köprü çökünce kırılma/düşme sesi.
-    *   Araba motoru ve lastik sesi (oynatılınca).
-    *   Bütçeden para azalırken metalik coin/para efekti.
-*   **[EKSİK] Araç Marketi (Car Shop):** Menüde "Market" var. Fakat kazanılan "Yıldızlar (Stars)" kullanılarak farklı arabaların kilitlerinin açıldığı, oyuncuyu elde tutmaya yarayan o tatmin edici alışveriş/kamera ekranının bağlanması gerek.
-*   **[EKSİK] Özel Kiriş Silme (Delete Mode):** "Geri Al (Undo)" her şeyi sırayla siliyor. Ancak kullanıcının hatalı çektiği tek bir kiriş/odun varsa o kirişin üzerine tıklayıp silebildiği bir silgi/çöp kutusu aracına ihtiyaç olabilir.
+    *   Köprü gerilirken / kırılırken ses efektleri eklendi.
+    *   Kazanma ve kaybetme durumlarına özel sesler.
+    *   Bütçeden para azalırken / satın alma yaparken coin efekti eklendi.
+*   **[YAPILDI] Araç Marketi (Car Shop):** Market arayüzü "Premium" (glassmorphism) tasarıma kavuşturuldu, 3D izleme ekranı ve ses efektleri bağlandı.
+*   **[YAPILDI] Özel Kiriş Silme (Delete Mode):** İnşa modunda kirişlerin üzerine tıklayarak tek tek silinebilmesi (Kiriş seç-sil) özelliği eklendi.
 
 ## 4. Teknik Performans & Optimizasyon
 *   **[GÖZDEN GEÇİR] Cannon.js Fizik "Tunneling":** Arabanın veya köprünün fiziği çok hızlanıp ince zeminleri/yolları delip altından geçmeye (Tunneling bug) meyil etmemesi için, araba fizikleri ve materyal yoğunluklarına / Cannon iteration değerlerine sürekli göz kulak olunmalıdır. (Şu an stabilize edilmiş durumda, ancak yeni seviyeler eklenirken dikkat edilmeli).

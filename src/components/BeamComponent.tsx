@@ -5,6 +5,7 @@ import { useGameStore } from '../store/gameStore';
 import { MATERIALS } from '../utils/materials';
 import { MaterialType } from '../types';
 import { getRoadTexture } from '../utils/roadTexture';
+import AudioManager from '../utils/AudioManager';
 
 interface BeamComponentProps {
     id: string;
@@ -13,7 +14,7 @@ interface BeamComponentProps {
     material: MaterialType;
 }
 
-export default function BeamComponent({ startNodeId, endNodeId, material }: BeamComponentProps) {
+export default function BeamComponent({ id, startNodeId, endNodeId, material }: BeamComponentProps) {
     const { getNodeById, gameState } = useGameStore();
     const gl = useThree((state) => state.gl);
 
@@ -71,7 +72,12 @@ export default function BeamComponent({ startNodeId, endNodeId, material }: Beam
                 rotation={[0, 0, angle]}
                 onClick={(e) => {
                     e.stopPropagation();
-                    // Optional: Handle click in editor mode
+                    // Handle click in editor mode to remove beam
+                    if (gameState.mode === 'editor') {
+                        const { removeBeam } = useGameStore.getState();
+                        removeBeam(id);
+                        AudioManager.playSound('break'); // Play 'break' or 'delete' sound
+                    }
                 }}
             >
                 <boxGeometry args={[length, materialProps.thickness, depth]} />

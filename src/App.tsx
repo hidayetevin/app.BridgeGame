@@ -10,6 +10,7 @@ import { translations } from './data/translations';
 import { AdManager } from './utils/AdManager';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
+import AudioManager from './utils/AudioManager';
 
 function App() {
     const { setScreen, nodes, beams, resetLevel, gameState, setMode, loadLevel, hasWon, hasLost, failReason, selectedMaterial, selectMaterial, timeLeft, isTimerRunning, decrementTime, undo, history, addBudget, clearBudgetExceeded, doubleStars } = useGameStore();
@@ -43,6 +44,9 @@ function App() {
             await AdManager.init();
             await AdManager.showBanner();
             await AdManager.prepareInterstitial(); // preload for later
+
+            // Start Background Music
+            AudioManager.playMusic();
         };
         initNative();
     }, []);
@@ -50,12 +54,20 @@ function App() {
     // Double-star countdown when win modal appears
     useEffect(() => {
         if (hasWon) {
+            AudioManager.playSound('win');
             setShowWinActions(false);
             setDoubleUsed(false);
             const timer = setTimeout(() => setShowWinActions(true), 2000);
             return () => clearTimeout(timer);
         }
     }, [hasWon]);
+
+    // Loss sound trigger
+    useEffect(() => {
+        if (hasLost) {
+            AudioManager.playSound('loss');
+        }
+    }, [hasLost]);
 
     // Timer Logic
     useEffect(() => {
@@ -96,6 +108,16 @@ function App() {
             {/* In-Game UI */}
             {gameState.screen === 'game' && (
                 <>
+                    {/* Main UI Container with Banner Safe Area */}
+                    <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        paddingBottom: '60px', // Reserve space for 50px-60px height banner
+                        pointerEvents: 'none',
+                        zIndex: 10
+                    }}>
+                        {/* Sub-elements that need pointer events should have pointerEvents: 'auto' */}
+                    </div>
 
                     {/* Timer Overlay - Top Center */}
                     {gameState.mode === 'simulation' && (

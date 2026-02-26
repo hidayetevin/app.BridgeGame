@@ -4,6 +4,7 @@ import { useGLTF, OrbitControls } from '@react-three/drei';
 import { useGameStore } from '../store/gameStore';
 import { CARS, CarData } from '../data/cars';
 import { AdManager } from '../utils/AdManager';
+import AudioManager from '../utils/AudioManager';
 
 // ─── 3D preview of a single car ───────────────────────────────────────────────
 function CarPreview3D({ car }: { car: CarData }) {
@@ -58,6 +59,7 @@ export default function CarShop() {
     const handleBuy = () => {
         const ok = buyCar(selected.id, selected.price);
         if (ok) {
+            AudioManager.playSound('money');
             showFeedback(isTr ? '✅ Satın alındı ve giydirildi!' : '✅ Purchased & equipped!');
         } else {
             showFeedback(isTr ? '❌ Yeterli yıldız yok!' : '❌ Not enough stars!');
@@ -66,6 +68,7 @@ export default function CarShop() {
 
     const handleEquip = () => {
         equipCar(selected.id);
+        AudioManager.playSound('click');
         showFeedback(isTr ? '✅ Araç giydirildi!' : '✅ Vehicle equipped!');
     };
 
@@ -95,30 +98,61 @@ export default function CarShop() {
             {/* ── Header ── */}
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 16px',
-                background: 'rgba(255,255,255,0.05)',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                padding: '16px 24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(20px)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
                 flexShrink: 0,
             }}>
                 <button
-                    onClick={() => setScreen('menu')}
-                    style={{
-                        background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white',
-                        padding: '8px 16px', borderRadius: '8px', cursor: 'pointer',
-                        fontSize: '14px', fontWeight: 'bold',
+                    onClick={() => {
+                        AudioManager.playSound('click');
+                        setScreen('menu');
                     }}
+                    style={{
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        padding: '10px 20px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
                 >
-                    ← {isTr ? 'Geri' : 'Back'}
+                    <span style={{ fontSize: '18px' }}>←</span> {isTr ? 'Geri' : 'Back'}
                 </button>
-                <div style={{ fontSize: '20px', fontWeight: 'bold' }}>
+                <div style={{
+                    fontSize: '22px',
+                    fontWeight: 800,
+                    letterSpacing: '-0.5px',
+                    background: 'linear-gradient(to right, #fff, #94a3b8)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                }}>
                     🏪 {isTr ? 'Araç Marketi' : 'Vehicle Market'}
                 </div>
                 <div style={{
-                    background: 'linear-gradient(135deg,#f59e0b,#d97706)',
-                    padding: '6px 14px', borderRadius: '20px',
-                    fontWeight: 'bold', fontSize: '15px',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    color: '#f59e0b',
+                    padding: '8px 18px',
+                    borderRadius: '24px',
+                    fontWeight: 800,
+                    fontSize: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 0 20px rgba(245, 158, 11, 0.15)'
                 }}>
-                    ⭐ {stars}
+                    <span style={{ fontSize: '18px' }}>⭐</span> {stars}
                 </div>
             </div>
 
@@ -159,9 +193,10 @@ export default function CarShop() {
 
                     {/* Car info + action */}
                     <div style={{
-                        padding: '16px',
-                        background: 'rgba(255,255,255,0.04)',
-                        borderTop: '1px solid rgba(255,255,255,0.08)',
+                        padding: '24px',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                        backdropFilter: 'blur(10px)',
                     }}>
                         <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
                             {selected.emoji} {isTr ? selected.name : selected.nameEn}
@@ -195,11 +230,15 @@ export default function CarShop() {
                                     onClick={handleEquip}
                                     style={{
                                         width: '100%',
-                                        background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+                                        background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
                                         border: 'none', color: 'white',
-                                        padding: '12px', borderRadius: '10px',
-                                        fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
+                                        padding: '14px', borderRadius: '14px',
+                                        fontWeight: 800, fontSize: '16px', cursor: 'pointer',
+                                        boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                                        transition: 'all 0.2s',
                                     }}
+                                    onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
+                                    onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
                                 >
                                     🚗 {isTr ? 'Seç' : 'Equip'}
                                 </button>
@@ -211,18 +250,22 @@ export default function CarShop() {
                                 style={{
                                     width: '100%',
                                     background: canAfford
-                                        ? 'linear-gradient(135deg,#f59e0b,#d97706)'
-                                        : 'rgba(255,255,255,0.1)',
-                                    border: 'none',
-                                    color: canAfford ? '#1a1a1a' : 'rgba(255,255,255,0.4)',
-                                    padding: '12px', borderRadius: '10px',
-                                    fontWeight: 'bold', fontSize: '15px',
+                                        ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                                        : 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    color: canAfford ? '#1a1a1a' : 'rgba(255, 255, 255, 0.3)',
+                                    padding: '14px', borderRadius: '14px',
+                                    fontWeight: 800, fontSize: '16px',
                                     cursor: canAfford ? 'pointer' : 'not-allowed',
+                                    boxShadow: canAfford ? '0 4px 15px rgba(245, 158, 11, 0.3)' : 'none',
+                                    transition: 'all 0.2s',
                                 }}
+                                onMouseEnter={e => canAfford && (e.currentTarget.style.transform = 'translateY(-2px)')}
+                                onMouseLeave={e => canAfford && (e.currentTarget.style.transform = 'translateY(0)')}
                             >
                                 {canAfford
                                     ? `⭐ ${selected.price} — ${isTr ? 'Satın Al' : 'Buy'}`
-                                    : `⭐ ${selected.price} ${isTr ? '(Yetmez)' : '(Need more stars)'}`}
+                                    : `⭐ ${selected.price} ${isTr ? '(Yetersiz)' : '(Need more stars)'}`}
                             </button>
                         )}
                     </div>

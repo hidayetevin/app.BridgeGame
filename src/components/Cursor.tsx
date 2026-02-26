@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3, Raycaster, Vector2, Plane } from 'three';
 import { snapToGrid } from '../utils/snapToGrid';
 import { useGameStore } from '../store/gameStore';
+import AudioManager from '../utils/AudioManager';
 
 interface CursorProps {
     offsetY?: number;
@@ -106,6 +107,7 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
                     const newNode = getNodeAt(finalX, finalY);
                     if (newNode) {
                         finishDrawingBeam(newNode.id);
+                        AudioManager.playSound('place_node'); // Play sound when a new node is placed
                     }
                 } else {
                     // Cancel if same node
