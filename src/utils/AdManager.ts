@@ -8,6 +8,7 @@ import {
     RewardAdPluginEvents,
 } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
+import AudioManager from './AudioManager';
 
 export const AdConfig = {
     appId: 'ca-app-pub-4190858087915294~9982889385',
@@ -161,6 +162,7 @@ export class AdManager {
         }
 
         isShowingAd = true;
+        AudioManager.pauseMusic(); // Müziği durdur
 
         return new Promise(async (resolve) => {
             let resolved = false;
@@ -168,6 +170,7 @@ export class AdManager {
                 if (!resolved) {
                     resolved = true;
                     isShowingAd = false;
+                    AudioManager.resumeMusic(); // Müziği devam ettir
                     resolve();
                     // Immediately preload next one in background
                     interstitialReady = false;
@@ -237,6 +240,7 @@ export class AdManager {
         }
 
         isShowingAd = true;
+        AudioManager.pauseMusic(); // Müziği durdur
 
         return new Promise(async (resolve) => {
             let resolved = false;
@@ -244,6 +248,7 @@ export class AdManager {
                 if (!resolved) {
                     resolved = true;
                     isShowingAd = false;
+                    AudioManager.resumeMusic(); // Müziği devam ettir
                     resolve(result);
                     // Immediately preload the next one in background
                     rewardedReady = false;

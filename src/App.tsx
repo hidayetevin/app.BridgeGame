@@ -10,6 +10,7 @@ import { translations } from './data/translations';
 import { AdManager } from './utils/AdManager';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import AudioManager from './utils/AudioManager';
 
 function App() {
@@ -49,6 +50,19 @@ function App() {
             AudioManager.playMusic();
         };
         initNative();
+
+        // Uygulama arka plana geçince müziği durdur, öne gelince devam ettir
+        const appStateListener = CapApp.addListener('appStateChange', ({ isActive }) => {
+            if (isActive) {
+                AudioManager.resumeMusic();
+            } else {
+                AudioManager.pauseMusic();
+            }
+        });
+
+        return () => {
+            appStateListener.then(l => l.remove());
+        };
     }, []);
 
     // Double-star countdown when win modal appears

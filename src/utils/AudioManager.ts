@@ -53,6 +53,18 @@ class AudioManager {
         }
     }
 
+    public pauseMusic() {
+        if (this.bgMusic && !this.bgMusic.paused) {
+            this.bgMusic.pause();
+        }
+    }
+
+    public resumeMusic() {
+        if (this.bgMusic && this.bgMusic.paused && !this.isMuted) {
+            this.bgMusic.play().catch(() => { });
+        }
+    }
+
     public playSound(name: string) {
         if (this.isMuted) return;
         const sound = this.sounds.get(name);
