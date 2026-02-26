@@ -14,7 +14,7 @@ import { LEVELS } from '../data/levels';
 import GroundVisual from './GroundVisual';
 import TutorialGuide from './TutorialGuide';
 
-export default function Scene() {
+export default function Scene({ isPaused = false }: { isPaused?: boolean }) {
     const { nodes, beams, gameState } = useGameStore();
     const isSimulating = gameState.mode === 'simulation';
     const level = LEVELS[gameState.levelIndex];
@@ -91,8 +91,8 @@ export default function Scene() {
                     {/* Interactive Cursor */}
                     <Cursor offsetY={0} />
 
-                    {/* Tutorial / Help Hand (only shows if conditions met) */}
-                    <TutorialGuide />
+                    {/* Tutorial / Help Hand (only shows if conditions met and game is not paused) */}
+                    <TutorialGuide isPaused={isPaused} />
 
                     {/* Render all beams */}
                     {beams.map((beam) => (

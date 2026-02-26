@@ -130,7 +130,7 @@ function App() {
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             {/* 3D Scene always in Background */}
-            <Scene />
+            <Scene isPaused={isPaused} />
 
             {/* Fullscreen Overlays */}
             {gameState.screen === 'menu' && <MenuScreen />}

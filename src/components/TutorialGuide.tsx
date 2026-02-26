@@ -3,11 +3,11 @@ import { Html } from '@react-three/drei';
 import { useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 
-export default function TutorialGuide() {
+export default function TutorialGuide({ isPaused = false }: { isPaused?: boolean }) {
     const { gameState, beams } = useGameStore();
 
-    // Sadece 1. seviyede (index 0), oyun ekranındayken, editör modundayken ve henüz HİÇBİR kiriş çizilmemişse görünür.
-    const isVisible = gameState.screen === 'game' && gameState.levelIndex === 0 && gameState.mode === 'editor' && beams.length === 0;
+    // Sadece 1. seviyede, oyun ekranındayken, editör modundayken, duraklatılmamışken ve henüz HİÇBİR kiriş çizilmemişse görünür.
+    const isVisible = !isPaused && gameState.screen === 'game' && gameState.levelIndex === 0 && gameState.mode === 'editor' && beams.length === 0;
 
     const handRef = useRef<HTMLDivElement>(null);
 
