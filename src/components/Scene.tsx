@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Image } from '@react-three/drei';
+import { Image, useTexture } from '@react-three/drei';
 import Camera from './Camera';
 import Cursor from './Cursor';
 import NodeComponent from './NodeComponent';
@@ -19,22 +19,34 @@ export default function Scene({ isPaused = false }: { isPaused?: boolean }) {
     const isSimulating = gameState.mode === 'simulation';
     const level = LEVELS[gameState.levelIndex];
 
-    // Background Image Component — tam ekrana oturur
+    // Background Image Component — tam ekrana "cover" modunda oturur
     const ResponsiveBackground = () => {
         const { viewport, camera } = useThree();
+        const texture = useTexture('/images/background.png');
 
-        // 1. "Beyaz boşluk kalmaması" için genişlik tam, yükseklik %130 olarak ayarlanır.
-        // Yüksekliği fazla tutuyoruz ki, resmi aşağı kaydırdığımızda üstten beyazlık çıkmasın.
-        const bgWidth = viewport.width * 1.05;
-        const bgHeight = viewport.height * 1.30;
+        // Gerçek resim boyutlarından en-boy oranı
+        const img = texture.image as HTMLImageElement;
+        const imgW = img?.naturalWidth || img?.width || 1600;
+        const imgH = img?.naturalHeight || img?.height || 900;
+        const imageAspect = imgW / imgH;
 
-        // 2. Kameranın Y merkezini bul.
+        // CSS "cover" mantığı: viewport'u hem genişlik hem yükseklikte tam kapla
+        const viewportAspect = viewport.width / viewport.height;
+        let bgWidth: number, bgHeight: number;
+        if (viewportAspect >= imageAspect) {
+            // Viewport resimden geniş → genişliğe göre ölçekle
+            bgWidth = viewport.width * 1.05;
+            bgHeight = bgWidth / imageAspect;
+        } else {
+            // Viewport resimden dar/yüksek (tablet portre vb.) → yüksekliğe göre
+            bgHeight = viewport.height * 1.05;
+            bgWidth = bgHeight * imageAspect;
+        }
+
+        // Kameranın Y merkezini bul ve resmi hafif aşağı kaydır (su görünsün)
         const oCam = camera as THREE.OrthographicCamera;
         const camCenterY = (oCam.top + oCam.bottom) / 2;
-
-        // 3. Resmi aşağı kaydır (- işareti yönümüzü aşağı çevirir).
-        // Böylece resmin alt tarafındaki sular kadrajın içine (kameraların gördüğü alana) girer.
-        const posY = camCenterY - (viewport.height * 0.10);
+        const posY = camCenterY - viewport.height * -0.10;
 
         return (
             <Suspense fallback={null}>
