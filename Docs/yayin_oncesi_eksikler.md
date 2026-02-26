@@ -9,7 +9,7 @@ Bu doküman, "**Bridge Master**" (`com.evnlabs.bridgemaster`) oyununun Google Pl
 ## 2. Oynanış ve Seviyeler (Gameplay & Level Design)
 *   **[YAPILDI] 1. Level İçin Görsel Eğitim (Tutorial):** İlk seviye olan "Eğitim Köprüsü"ne özel, eğer hiç kiriş çizilmemişse beliren parmak (`👆`) animasyonlu bir **TutorialGuide** bileşeni oluşturuldu. Kılavuz, oyuncuya başlangıç noktasından bitiş noktasına basılı tutarak sürüklemesi gerektiğini gösterir.
 *   **[YAPILDI] Hata / Yenilgi Geri Bildirimi:** Oyun kaybedildiğinde (kaybetme nedenini tutan `failReason` State'i eklendi), Yenilgi Modal'ında "Araç Suya Düştü!", "Araç Köprüyü Kırdı!" veya "Süre Doldu!" şeklinde özelleştirilmiş, net dönütler yazılıyor.
-*   **[GÖZDEN GEÇİR] Bütçe / Zorluk Dengesi:** 51 adet levelin bütçe ve uzunlukları (zorluk eğrisi) sürekli test edilmeli, imkansız leveller düzeltilmelidir.
+*   **[YAPILDI] Bütçe / Zorluk Dengesi:** 51 adet levelin bütçe ve uzunlukları test edildi, zorluk eğrisi dengelendi.
 
 ## 3. Kullanıcı Deneyimi ve Arayüz (UX/UI)
 *   **[YAPILDI] Ses Efektleri ve Müzik (SFX):** `AudioManager` entegre edildi.
@@ -18,14 +18,17 @@ Bu doküman, "**Bridge Master**" (`com.evnlabs.bridgemaster`) oyununun Google Pl
     *   Köprü gerilirken / kırılırken ses efektleri eklendi.
     *   Kazanma ve kaybetme durumlarına özel sesler.
     *   Bütçeden para azalırken / satın alma yaparken coin efekti eklendi.
+    *   Arka plana geçince ve reklam sırasında müzik duraklatılıyor.
+    *   Ayarlar ve pause menüsünden müzik/ses efekti açma-kapama.
+*   **[YAPILDI] Ses Dosyaları:** `public/sounds/` klasörüne tüm gerekli `.mp3` dosyaları eklendi.
 *   **[YAPILDI] Araç Marketi (Car Shop):** Market arayüzü "Premium" (glassmorphism) tasarıma kavuşturuldu, 3D izleme ekranı ve ses efektleri bağlandı.
 *   **[YAPILDI] Özel Kiriş Silme (Delete Mode):** İnşa modunda kirişlerin üzerine tıklayarak tek tek silinebilmesi (Kiriş seç-sil) özelliği eklendi.
 
 ## 4. Teknik Performans & Optimizasyon
-*   **[GÖZDEN GEÇİR] Cannon.js Fizik "Tunneling":** Arabanın veya köprünün fiziği çok hızlanıp ince zeminleri/yolları delip altından geçmeye (Tunneling bug) meyil etmemesi için, araba fizikleri ve materyal yoğunluklarına / Cannon iteration değerlerine sürekli göz kulak olunmalıdır. (Şu an stabilize edilmiş durumda, ancak yeni seviyeler eklenirken dikkat edilmeli).
-*   **[KONTROL] Mobil Cihaz FPS:** Eski nesil Android cihazlarda kasma olmaması için arka plandaki dinamik dalgalı su efektinin vb. testleri yapılmalıdır.
+*   **[YAPILDI] Cannon.js Fizik "Tunneling":** Arabanın veya köprünün fiziği test edildi, mevcut seviyeler için stabilize edildi.
+*   **[YAPILDI] Mobil Cihaz FPS:** Eski nesil Android cihazlarda testler yapıldı.
 
 ## 5. Google Play Özellikleri
-*   **[EKSİK] Splash Screen (Açılış Ekranı):** Siyah/beyaz boş ekran yerine, logomuzun ve oyun adının yer aldığı statik veya animasyonlu kaliteli bir Android açılış ekranı (Splash Screen) tasarlanmalı.
-*   **[EKSİK] App Icon (Uygulama İkonu):** Capacitor'ın varsayılan ikonu yerine, oyunu anlatan (Köprünün üstünde mavi araba vb.) şık bir kare/oval ikon hazırlanmalı (örn: `capacitor-assets` kullanılarak her çözünürlüğe basılacak).
-*   **[EKSİK] App Store / Play Store Görselleri:** Satış sayfası için şık mockup frame çerçevelerine yerleştirilmiş ekran görüntüleri (Aesthetic Screenshots).
+*   **[YAPILDI] Splash Screen (Açılış Ekranı):** Android açılış ekranı tasarlandı ve eklendi.
+*   **[YAPILDI] App Icon (Uygulama İkonu):** Özel ikon hazırlandı ve `capacitor-assets` ile tüm çözünürlüklere basıldı.
+*   **[YAPILDI] App Store / Play Store Görselleri:** Satış sayfası için mockup çerçeveli ekran görüntüleri hazırlandı.
