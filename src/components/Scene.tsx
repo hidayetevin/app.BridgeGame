@@ -41,7 +41,7 @@ export default function Scene() {
                 <Image
                     url="/images/background.png"
                     transparent
-                    position={[camera.position.x, posY, -37]}
+                    position={[camera.position.x, posY, -17]}
                     scale={[bgWidth, bgHeight]}
                 />
             </Suspense>
