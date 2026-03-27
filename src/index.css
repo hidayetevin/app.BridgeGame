@@ -24,3 +24,29 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@keyframes pulse-btn {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 16px rgba(255, 165, 0, 0.5);
+  }
+
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 6px 24px rgba(255, 165, 0, 0.8);
+  }
+}
+
+@keyframes fadein-badge {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

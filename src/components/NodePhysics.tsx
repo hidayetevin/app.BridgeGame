@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSphere } from '@react-three/cannon';
 import { Mesh } from 'three';
 import { useGameStore } from '../store/gameStore';
@@ -10,7 +10,7 @@ interface NodePhysicsProps {
     type: 'normal' | 'anchor';
 }
 
-export default function NodePhysics({ id, x, y, type }: NodePhysicsProps) {
+const NodePhysics = ({ id, x, y, type }: NodePhysicsProps) => {
     const isAnchor = type === 'anchor';
     const { registerPhysicsBody, unregisterPhysicsBody } = useGameStore();
 
@@ -19,10 +19,8 @@ export default function NodePhysics({ id, x, y, type }: NodePhysicsProps) {
         position: [x, y, 0],
         args: [isAnchor ? 0.3 : 0.2],
         type: isAnchor ? 'Static' : 'Dynamic',
-        collisionFilterGroup: 8, // Group 8: Nodes
-        // Mask: 0 (No collision with anything).
-        // They are just connection points held by constraints.
-        collisionFilterMask: 0,
+        collisionFilterGroup: 8, // Nodes Group
+        collisionFilterMask: 0,  // No collision with anything
     }));
 
     // Register physics body REF and API
@@ -39,4 +37,6 @@ export default function NodePhysics({ id, x, y, type }: NodePhysicsProps) {
             />
         </mesh>
     );
-}
+};
+
+export default NodePhysics;

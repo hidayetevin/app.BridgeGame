@@ -1,63 +1,116 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, Suspense, useMemo } from 'react';
 import { useBox, useSphere, useHingeConstraint } from '@react-three/cannon';
 import { useFrame } from '@react-three/fiber';
-import { Mesh, Vector3 } from 'three';
+import { useGLTF } from '@react-three/drei';
+import { Mesh } from 'three';
 import { useGameStore } from '../store/gameStore';
 import { LEVELS } from '../data/levels';
+import { CARS } from '../data/cars';
 
+// ─── Paths ────────────────────────────────────────────────────────────────────
+const GLB_BASE = '/models/GLB format/';
+const DEFAULT_CAR = 'sedan-sports';
+
+// ─── GLB car body — child of physics chassis mesh ─────────────────────────────
+function CarBodyGLB({ glbPath, previewScale }: { glbPath: string; previewScale: number }) {
+    const { scene } = useGLTF(glbPath);
+    const cloned = useMemo(() => scene.clone(true), [scene, glbPath]);
+    return (
+        <primitive
+            object={cloned}
+            scale={previewScale * 0.5}  // previewScale is 1.4 for sedan → 0.7 game scale
+            rotation={[0, Math.PI / 2, 0]}
+            position={[0, -0.50, 0]}
+        />
+    );
+}
+
+// ─── Static Visual Preview for Editor Mode ──────────────────────────────────────
+export function VehiclePreview() {
+    const { gameState } = useGameStore();
+    const level = LEVELS[gameState.levelIndex];
+    if (!level) return null;
+
+    const equippedId = gameState.equippedCar || DEFAULT_CAR;
+    const carData = CARS.find(c => c.id === equippedId) || CARS[0];
+    const carGlbPath = GLB_BASE + equippedId + '.glb';
+
+    return (
+        <group position={[level.vehicleStart.x, level.vehicleStart.y, 0]}>
+            <Suspense fallback={
+                <mesh position={[0, 0.1, 0]}>
+                    <boxGeometry args={[1.5, 0.38, 0.8]} />
+                    <meshStandardMaterial color="#e53935" roughness={0.3} metalness={0.5} />
+                </mesh>
+            }>
+                <CarBodyGLB glbPath={carGlbPath} previewScale={carData.previewScale} />
+            </Suspense>
+        </group>
+    );
+}
+
+// ─── Main Vehicle ─────────────────────────────────────────────────────────────
 export default function Vehicle() {
-    const { gameState, setWin, setLoss } = useGameStore();
+    const { gameState, setWon, setLost } = useGameStore();
     const level = LEVELS[gameState.levelIndex];
 
+    // Resolve equipped car data for GLB path
+    const equippedId = gameState.equippedCar || DEFAULT_CAR;
+    const carData = CARS.find(c => c.id === equippedId) || CARS[0];
+    const carGlbPath = GLB_BASE + equippedId + '.glb';
+
+    // Preload the equipped car ahead of simulation start
+    useEffect(() => {
+        useGLTF.preload(carGlbPath);
+    }, [carGlbPath]);
+
+    // Track cannon physics position via subscribe (same as original approach)
     const posX = useRef(level.vehicleStart.x);
     const posY = useRef(level.vehicleStart.y);
     const hasWon = useRef(false);
     const hasFallen = useRef(false);
 
-    // Collision Mask:
-    // Group 2: Vehicle
-    // Mask: 1 (Ground) | 4 (Beams) = 5
-    // NOT 8 (Nodes/Anchors)
-
-    // 1. Chassis (Car Body)
-    const [chassisRef, chassisApi] = useBox(() => ({
-        mass: 15,
+    // 1. Chassis
+    const [chassisRef, chassisApi] = useBox<Mesh>(() => ({
+        mass: 15, // Ağırlığı normale çektik çünkü fizik motoru ince yolları delip geçiyor ("Tunneling" efekti)
         position: [level.vehicleStart.x, level.vehicleStart.y, 0],
-        args: [1.6, 0.5, 0.8],
+        // Orijinal görünümden daha küçük bir çarpışma kutusu (Hitbox) kullanıyoruz.
+        // Bu sayede ani rampalara çıkarken arabanın tekerleği yola değmeden önce tamponu yere sürtüp arabayı takla attırmayacak.
+        args: [1.2, 0.3, 0.8],
         allowSleep: false,
         angularDamping: 0.5,
         collisionFilterGroup: 2,
-        collisionFilterMask: 1 | 4, // Ground and Beams only
+        collisionFilterMask: 1 | 4,
+        angularFactor: [0, 0, 1],
     }));
 
-    // 2. Wheel 1 (Rear)
-    const [wheel1Ref, wheel1Api] = useSphere(() => ({
-        mass: 2,
+    // 2. Rear wheel
+    const [wheel1Ref, wheel1Api] = useSphere<Mesh>(() => ({
+        mass: 3,
         position: [level.vehicleStart.x - 0.6, level.vehicleStart.y - 0.4, 0],
-        args: [0.35],
-        friction: 2, // High friction for grip
+        args: [0.45],
+        friction: 5, // Daha stabil bir tutunma değeri, 25 fizik kurallarını ihlal edip yeri kırıyordu
         collisionFilterGroup: 2,
-        collisionFilterMask: 1 | 4, // Ground and Beams only
+        collisionFilterMask: 1 | 4,
     }));
 
-    // 3. Wheel 2 (Front)
-    const [wheel2Ref, wheel2Api] = useSphere(() => ({
-        mass: 2,
+    // 3. Front wheel
+    const [wheel2Ref, wheel2Api] = useSphere<Mesh>(() => ({
+        mass: 3,
         position: [level.vehicleStart.x + 0.6, level.vehicleStart.y - 0.4, 0],
-        args: [0.35],
-        friction: 2,
+        args: [0.45],
+        friction: 5,
         collisionFilterGroup: 2,
-        collisionFilterMask: 1 | 4, // Ground and Beams only
+        collisionFilterMask: 1 | 4,
     }));
 
-    // 4. Attach Wheels to Chassis
+    // 4. Hinge constraints
     useHingeConstraint(chassisRef, wheel1Ref, {
         pivotA: [-0.6, -0.4, 0],
         pivotB: [0, 0, 0],
         axisA: [0, 0, 1],
         axisB: [0, 0, 1],
     });
-
     useHingeConstraint(chassisRef, wheel2Ref, {
         pivotA: [0.6, -0.4, 0],
         pivotB: [0, 0, 0],
@@ -65,37 +118,39 @@ export default function Vehicle() {
         axisB: [0, 0, 1],
     });
 
-    // 5. Game Logic
-    useFrame(() => {
-        if (gameState.mode !== 'simulation') return;
-
-        chassisApi.position.subscribe((p) => {
+    // 5. Subscribe to cannon position — original approach, reliable
+    useEffect(() => {
+        const unsub = chassisApi.position.subscribe((p) => {
             posX.current = p[0];
             posY.current = p[1];
         });
+        return unsub;
+    }, [chassisApi]);
 
+    // 6. Game logic & drive — runs every frame
+    useFrame(() => {
+        if (gameState.mode !== 'simulation') return;
+
+        // Win check
         if (posX.current >= level.vehicleTarget && !hasWon.current) {
             hasWon.current = true;
-            setWin();
+            setWon(true);
         }
 
-        if (posY.current < level.waterLevel && !hasFallen.current) {
+        // Fall check
+        if (posY.current < level.waterLevel && !hasFallen.current && !hasWon.current) {
             hasFallen.current = true;
-            setLoss();
+            setLost(true);
         }
 
-        // Drive Logic
-        if (!hasWon.current && !hasFallen.current && posX.current < level.vehicleTarget) {
-            // Apply torque for driving
-            wheel1Api.angularVelocity.set(0, 0, -20); // Faster (-20)
-            wheel2Api.angularVelocity.set(0, 0, -20);
-
-            // Removed manual push force, let the wheels do the work
-            // chassisApi.applyForce([10, 0, 0], [0, 0, 0]);
+        // Drive - 4x4 Motor Gücü (Daha yüksek tork)
+        if (!hasWon.current && !hasFallen.current) {
+            wheel1Api.angularVelocity.set(0, 0, -25);
+            wheel2Api.angularVelocity.set(0, 0, -25);
         }
     });
 
-    // Reset
+    // 7. Reset when switching back to editor
     useEffect(() => {
         if (gameState.mode === 'editor') {
             chassisApi.position.set(level.vehicleStart.x, level.vehicleStart.y, 0);
@@ -118,23 +173,39 @@ export default function Vehicle() {
 
     return (
         <group>
-            {/* Chassis Visual */}
-            <mesh ref={chassisRef as React.Ref<Mesh>} castShadow>
+            {/* ── Chassis: cannon physics mesh + car GLB as child ── */}
+            <mesh ref={chassisRef} castShadow>
                 <boxGeometry args={[1.6, 0.5, 0.8]} />
-                <meshStandardMaterial color="#e53935" />
+                <meshStandardMaterial visible={false} />
+
+                <Suspense fallback={
+                    <group>
+                        <mesh position={[0, 0.1, 0]}>
+                            <boxGeometry args={[1.5, 0.38, 0.8]} />
+                            <meshStandardMaterial color="#e53935" roughness={0.3} metalness={0.5} />
+                        </mesh>
+                    </group>
+                }>
+                    <CarBodyGLB glbPath={carGlbPath} previewScale={carData.previewScale} />
+                </Suspense>
             </mesh>
 
-            {/* Wheel 1 Visual */}
-            <mesh ref={wheel1Ref as React.Ref<Mesh>} castShadow>
-                <sphereGeometry args={[0.35, 16, 16]} />
-                <meshStandardMaterial color="#212121" />
+            {/* ── Wheels: physics only, invisible (car GLB has its own wheels) ── */}
+            <mesh ref={wheel1Ref} visible={false}>
+                <sphereGeometry args={[0.45, 8, 8]} />
+                <meshStandardMaterial />
             </mesh>
 
-            {/* Wheel 2 Visual */}
-            <mesh ref={wheel2Ref as React.Ref<Mesh>} castShadow>
-                <sphereGeometry args={[0.35, 16, 16]} />
-                <meshStandardMaterial color="#212121" />
+            <mesh ref={wheel2Ref} visible={false}>
+                <sphereGeometry args={[0.45, 8, 8]} />
+                <meshStandardMaterial />
             </mesh>
         </group>
     );
 }
+
+// Only preload the default (starter) car at module load time.
+// All other cars preload lazily: when equipped (Vehicle useEffect)
+// or when selected in CarShop.
+useGLTF.preload(GLB_BASE + DEFAULT_CAR + '.glb');
+

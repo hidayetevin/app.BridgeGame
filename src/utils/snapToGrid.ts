@@ -4,7 +4,7 @@ import { Vector3 } from 'three';
  * Snaps a coordinate to the nearest integer (grid unit)
  */
 export function snapToGrid(value: number): number {
-    return Math.round(value);
+    return Math.round(value * 2) / 2;
 }
 
 /**

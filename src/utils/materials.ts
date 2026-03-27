@@ -1,36 +1,52 @@
 import { MaterialType } from '../types';
 
-export const MATERIALS: Record<MaterialType, {
+export interface MaterialProps {
     name: string;
     color: string;
     cost: number;
     strength: number;      // Max force before breaking (Newtons)
     stiffness: number;     // For physics constraint
     thickness: number;
-}> = {
-    wood: {
-        name: 'Wood',
-        color: '#8B4513',
+    isRoad: boolean;       // Determines collision mask
+}
+
+export const MATERIALS: Record<MaterialType, MaterialProps> = {
+    road: {
+        name: 'Asphalt Road',
+        color: '#343a40', // Dark Asphalt
         cost: 10,
-        strength: 15000,
-        stiffness: 1e6,
-        thickness: 0.08,
+        strength: 500000, // 500k
+        stiffness: 5e5, // Stiffer
+        thickness: 0.25, // Thick road surface
+        isRoad: true,
+    },
+    wood: {
+        name: 'Wood Beam',
+        color: '#8B4513', // Brown
+        cost: 2.5,
+        strength: 100000, // 100k
+        stiffness: 2e5, // Very flexible
+        thickness: 0.12, // Standard beam
+        isRoad: false,
     },
     steel: {
-        name: 'Steel',
-        color: '#708090',
-        cost: 50,
-        strength: 50000,
-        stiffness: 5e6,
-        thickness: 0.12,
+        name: 'Steel Beam',
+        color: '#708090', // Grey
+        cost: 5,
+        strength: 2000000, // 2 Million! Super strong
+        stiffness: 2e6, // Very Stiff
+        thickness: 0.15,
+        isRoad: false,
     },
+    // Backward compatibility
     cable: {
         name: 'Cable',
         color: '#4A4A4A',
         cost: 5,
         strength: 8000,
         stiffness: 5e5,
-        thickness: 0.04,
+        thickness: 0.05,
+        isRoad: false,
     },
 };
 

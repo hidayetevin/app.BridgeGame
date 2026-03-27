@@ -20,6 +20,8 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
     const {
         addNode,
         getNodeAt,
+        getNearestNode,
+        startDrawingBeam,
         isDrawingBeam,
         updateGhostBeam,
         finishDrawingBeam,
@@ -56,19 +58,52 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
             setIsVisible(false);
         };
 
+        // 🧲 BASMACA MIKNATIS - ON PRESS (Çizime başlama)
+        // Parmak ekrana değdiği anda, 1.5 birim yarıçap içindeki en yakın düğümü bulup oradan çizmeye başlar.
+        // Böylece tam düğüme basmak gerekmez, yakınına basmak yeter.
+        const handlePointerDown = (event: PointerEvent) => {
+            if (isDrawingBeam) return; // Zaten çiziyorsa müdahale etme
+
+            // Ekran koordinatlarından 3D dünya koordinatlarına çevir
+            const nx = (event.clientX / size.width) * 2 - 1;
+            const ny = -(event.clientY / size.height) * 2 + 1;
+
+            const tempRay = new Raycaster();
+            tempRay.setFromCamera({ x: nx, y: ny } as any, camera);
+            const hit = new Vector3();
+            tempRay.ray.intersectPlane(plane.current, hit);
+
+            if (hit) {
+                const nearest = getNearestNode(hit.x, hit.y, 1.5);
+                if (nearest) {
+                    startDrawingBeam(nearest.id);
+                }
+            }
+        };
+
         const handlePointerUp = () => {
             if (isDrawingBeam) {
-                const x = Math.round(gridPosition.x);
-                const y = Math.round(gridPosition.y);
-                const targetNode = getNodeAt(x, y);
+                let finalX = gridPosition.x;
+                let finalY = gridPosition.y;
+
+                // 🧲 MIKNATIS ETKİSİ / SADECE BIRAKINCA - ON DROP
+                // Parmağı havaya kaldırdığınız an: çevredeki tam 5x5 (~2 birim yarıçap) alan taranır. 
+                // Hedefte önceden atılmış mavi bir düğüm (Node) varsa anında ona yapışır.
+                const nearest = getNearestNode(finalX, finalY, 1.5);
+                if (nearest && nearest.id !== selectedNodeId) {
+                    finalX = nearest.x;
+                    finalY = nearest.y;
+                }
+
+                const targetNode = getNodeAt(finalX, finalY);
 
                 if (targetNode && targetNode.id !== selectedNodeId) {
                     // Finish beam on existing node
                     finishDrawingBeam(targetNode.id);
                 } else if (!targetNode) {
                     // Create new node and finish beam
-                    addNode(x, y);
-                    const newNode = getNodeAt(x, y);
+                    addNode(finalX, finalY);
+                    const newNode = getNodeAt(finalX, finalY);
                     if (newNode) {
                         finishDrawingBeam(newNode.id);
                     }
@@ -82,14 +117,16 @@ export default function Cursor({ offsetY = 0 }: CursorProps) {
         const canvas = gl.domElement;
         canvas.addEventListener('pointermove', handlePointerMove);
         canvas.addEventListener('pointerleave', handlePointerLeave);
+        canvas.addEventListener('pointerdown', handlePointerDown);
         canvas.addEventListener('pointerup', handlePointerUp);
 
         return () => {
             canvas.removeEventListener('pointermove', handlePointerMove);
             canvas.removeEventListener('pointerleave', handlePointerLeave);
+            canvas.removeEventListener('pointerdown', handlePointerDown);
             canvas.removeEventListener('pointerup', handlePointerUp);
         };
-    }, [size, gl, isDrawingBeam, gridPosition, getNodeAt, addNode, finishDrawingBeam, cancelDrawingBeam, selectedNodeId]);
+    }, [size, gl, camera, isDrawingBeam, gridPosition, getNodeAt, getNearestNode, startDrawingBeam, addNode, finishDrawingBeam, cancelDrawingBeam, selectedNodeId]);
 
     if (!isVisible) return null;
 

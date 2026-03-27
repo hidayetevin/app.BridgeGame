@@ -1,7 +1,8 @@
 import { useGameStore } from '../store/gameStore';
+import { MATERIALS } from '../utils/materials';
 
 export default function GhostBeam() {
-    const { selectedNodeId, ghostBeamEnd, getNodeById, isDrawingBeam } = useGameStore();
+    const { selectedNodeId, ghostBeamEnd, getNodeById, isDrawingBeam, selectedMaterial } = useGameStore();
 
     if (!isDrawingBeam || !selectedNodeId || !ghostBeamEnd) return null;
 
@@ -16,16 +17,19 @@ export default function GhostBeam() {
     const midX = (startNode.x + ghostBeamEnd.x) / 2;
     const midY = (startNode.y + ghostBeamEnd.y) / 2;
 
+    // Get material properties for preview
+    const materialProps = MATERIALS[selectedMaterial] || MATERIALS['wood'];
+
     return (
         <group position={[midX, midY, 0]} rotation={[0, 0, angle]}>
             <mesh>
-                <boxGeometry args={[length, 0.08, 0.08]} />
+                <boxGeometry args={[length, materialProps.thickness, 1]} />
                 <meshStandardMaterial
-                    color="#4CAF50"
+                    color={materialProps.color}
                     transparent
                     opacity={0.5}
-                    emissive="#4CAF50"
-                    emissiveIntensity={0.3}
+                    emissive={materialProps.color}
+                    emissiveIntensity={0.2}
                 />
             </mesh>
         </group>
